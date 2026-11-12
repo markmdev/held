@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { authorize, createOrder, useConfig } from "../api";
 import type { Job } from "../../shared/types";
+import { Spinner } from "./ui";
 
 declare global {
   interface Window { paypal?: { Buttons: (o: object) => { render: (el: HTMLElement) => Promise<void>; close: () => void } } }
@@ -18,10 +19,31 @@ function loadSdk(clientId: string) {
   return sdk;
 }
 
+function CopyLine({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="flex items-center justify-between gap-2 py-1">
+      <span className="text-[13px] text-ink-2">{label}</span>
+      <button
+        className="flex min-w-0 items-center gap-2 rounded-md px-1.5 py-0.5 font-mono text-[13px] hover:bg-line-2"
+        onClick={() => {
+          void navigator.clipboard?.writeText(value);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1200);
+        }}
+      >
+        <span className="truncate">{value}</span>
+        <span className="font-sans text-[11px] text-ink-3">{copied ? "Copied" : "Copy"}</span>
+      </button>
+    </div>
+  );
+}
+
 // The client approves the hold in PayPal's own window; Held then places it.
 export function PayPalHold({ job, onHeld }: { job: Job; onHeld: (j: Job) => void }) {
   const config = useConfig();
   const box = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -31,28 +53,37 @@ export function PayPalHold({ job, onHeld }: { job: Job; onHeld: (j: Job) => void
       .then(() => {
         if (!box.current || !window.paypal) return;
         const b = window.paypal.Buttons({
-          style: { layout: "horizontal", label: "paypal", tagline: false, height: 45 },
+          style: { layout: "horizontal", label: "paypal", tagline: false, height: 45, shape: "rect" },
           createOrder: async () => (await createOrder(job.id)).orderId,
           onApprove: async () => onHeld(await authorize(job.id)),
           onError: (e: Error) => setError(e.message || "PayPal couldn't place the hold."),
         });
         buttons = b;
-        return b.render(box.current);
+        return b.render(box.current).then(() => setReady(true));
       })
       .catch((e: Error) => setError(e.message));
     return () => buttons?.close();
   }, [config?.paypalClientId, job.id, onHeld]);
 
-  if (config && !config.paypalClientId) return <p>PayPal isn't connected yet.</p>;
+  if (config && !config.paypalClientId)
+    return <p className="rounded-xl bg-off-bg px-3.5 py-3 text-[14.5px] text-ink-2">PayPal isn't connected yet, so the hold can't be placed. Try again later.</p>;
   return (
     <div>
+      {!ready && !error && (
+        <div className="flex h-[45px] items-center gap-2 text-[14px] text-ink-3">
+          <Spinner /> Loading PayPal
+        </div>
+      )}
       <div ref={box} />
       {config?.sandboxBuyer && (
-        <p className="mt-2 text-sm">
-          Sandbox buyer login: <code>{config.sandboxBuyer.email}</code> / <code>{config.sandboxBuyer.password}</code> (PayPal's test money)
-        </p>
+        <div className="mt-4 rounded-xl border border-dashed border-line bg-paper px-4 py-3">
+          <div className="label">Log in to PayPal with</div>
+          <CopyLine label="Email" value={config.sandboxBuyer.email} />
+          <CopyLine label="Password" value={config.sandboxBuyer.password} />
+          <div className="mt-1 text-[12px] leading-relaxed text-ink-3">A test buyer in PayPal's sandbox. Its money isn't real.</div>
+        </div>
       )}
-      {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
+      {error && <p className="mt-3 rounded-xl bg-fail-bg px-3.5 py-3 text-[14px] text-fail">{error}</p>}
     </div>
   );
 }
