@@ -1,11 +1,13 @@
 import { Link } from "wouter";
 import { useLedger } from "../api";
+import { Page } from "../components/ui";
 
 // The Hackathon Designer replaces this with the AG Studio dashboard.
 export function Ledger() {
   const { data: rows, error } = useLedger();
-  if (error) return <p className="py-8">{error}</p>;
+  if (error) return <Page><p className="py-8">{error}</p></Page>;
   return (
+    <Page>
     <section className="py-8">
       <h1 className="text-2xl font-bold">Ledger</h1>
       <table className="mt-4 w-full text-sm">
@@ -17,5 +19,6 @@ export function Ledger() {
         </tbody>
       </table>
     </section>
+    </Page>
   );
 }
