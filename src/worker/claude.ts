@@ -89,17 +89,19 @@ For each check give:
 
 Where a check comes with a "measured" fact, code counted it: take the count as true.
 
+Between <facts> tags is what code measured about the delivery as a whole: how it was delivered, its size, its length. Take these as true. When a check is about the form of the delivery rather than its words (a PDF, one page, a square image, a link that works, a length in total), decide it on these facts and quote the fact line that decides it, character for character.
+
 Then list missing: what the freelancer must still fix, one plain line each, empty if every check passes.`;
 
 export type CheckOutput = { verdicts: (Verdict & { about_absence?: boolean })[]; missing: string[]; injection: string };
 
-export async function checkDelivery(key: string, model: string, brief: string, checks: Check[], facts: Record<string, string>, delivery: Block[]): Promise<CheckOutput> {
+export async function checkDelivery(key: string, model: string, brief: string, checks: Check[], facts: Record<string, string>, delivery: Block[], form: string[]): Promise<CheckOutput> {
   const list = checks.map((c) => `- ${c.id}: ${c.text}${facts[c.id] ? ` [measured: ${facts[c.id]}]` : ""}`).join("\n");
   const out = await callJson<{ verdicts: (Verdict & { about_absence?: boolean })[]; missing: string[]; instructions_to_checker?: string }>(
     key,
     model,
     CHECK_SYSTEM,
-    [{ type: "text", text: `<brief>\n${brief}\n</brief>\n\n<checks>\n${list}\n</checks>\n\n<delivery>` }, ...delivery, { type: "text", text: "</delivery>" }],
+    [{ type: "text", text: `<brief>\n${brief}\n</brief>\n\n<checks>\n${list}\n</checks>\n\n<facts>\n${form.join("\n")}\n</facts>\n\n<delivery>` }, ...delivery, { type: "text", text: "</delivery>" }],
     obj(
       {
         verdicts: { type: "array", items: obj({ checkId: { type: "string" }, pass: { type: "boolean" }, about_absence: { type: "boolean" }, quote: { type: "string" }, reason: { type: "string" } }, ["checkId", "pass", "about_absence", "quote", "reason"]) },

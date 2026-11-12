@@ -92,6 +92,10 @@ export type BenchCase = {
   kind?: "text" | "pdf" | "image" | "link";
   /** What the case tests. */
   why?: string;
+  /** A harder case's verdict on its first run, before the fixes the misses led to. */
+  firstGot?: "pass" | "fail";
+  /** For a case missed on that first run: what went wrong and what was changed. */
+  cause?: string;
 };
 export type BenchResult = {
   ranAt: string | null;
@@ -99,6 +103,8 @@ export type BenchResult = {
   tuning: { right: number; total: number };
   heldOut: { right: number; total: number };
   hard: { right: number; total: number };
+  /** The harder cases' first run, on 12 November 2026, before any fix. */
+  hardFirst: { right: number; total: number; ranAt: string };
 };
 
 export type DailyLeft = { checksLeft: number; checksPerDay: number };

@@ -121,6 +121,7 @@ export function Results() {
       </Page>
     );
   const misses = bench.cases.filter((c) => c.right === false);
+  const firstMisses = bench.cases.filter((c) => c.firstGot && c.firstGot !== c.expected);
   const wrongPays = bench.cases.filter((c) => c.expected === "fail" && c.got === "pass").length;
   const inj = bench.cases.filter((c) => c.injection);
   const injCaught = inj.filter((c) => c.got === "fail").length;
@@ -134,7 +135,7 @@ export function Results() {
           The checker is Claude, held to four rules and tested on briefs with known answers.{" "}
           {bench.cases.length} briefs, each with a delivery and the verdict a careful person would give. {bench.tuning.total} were used while tuning the checker, {bench.heldOut.total}{" "}
           were held back from tuning, and {bench.hard.total} harder ones were written after the checker was finished: near misses, the wrong subject, a slip in tone only, a PDF,
-          images, a link and odd layouts. Every case is listed, the misses first.
+          images, a link and odd layouts. Their first run is shown as it came out, with what each miss led us to fix. Every case is listed, the misses first.
         </p>
         {bench.ranAt && <p className="mt-3 font-mono text-[11.5px] tracking-[0.1em] text-ink-3 uppercase">Last run {when(bench.ranAt)}</p>}
       </div>
@@ -146,7 +147,12 @@ export function Results() {
       ) : (
         <>
           <section className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-5">
-            <Big value={`${bench.hard.right} of ${bench.hard.total}`} label="Right on the harder cases" note="Written last, never tuned on" tone={bench.hard.right === bench.hard.total ? undefined : "bad"} />
+            <Big
+              value={`${bench.hardFirst.right} of ${bench.hardFirst.total}`}
+              label="Right on the harder cases, first run"
+              note={`${bench.hard.right} of ${bench.hard.total} after the fixes its misses led to`}
+              tone={bench.hardFirst.right === bench.hardFirst.total ? undefined : "bad"}
+            />
             <Big value={`${bench.heldOut.right} of ${bench.heldOut.total}`} label="Right on the held-back cases" note="Never seen while tuning" />
             <Big value={`${bench.tuning.right} of ${bench.tuning.total}`} label="Right on the tuning cases" />
             <Big value={String(wrongPays)} label="Times a failing delivery would have been paid" tone={wrongPays === 0 ? "good" : "bad"} />
@@ -191,6 +197,34 @@ export function Results() {
               </ul>
             )}
           </section>
+
+          {firstMisses.length > 0 && (
+            <section className="mt-14">
+              <h2 className="text-[28px] tracking-[-0.015em]">What the harder cases' first run got wrong</h2>
+              <p className="mt-2 max-w-3xl text-[17px] leading-[1.55] text-ink-2">
+                {firstMisses.length} of the {bench.hardFirst.total} harder cases were wrong on their first run, on {when(bench.hardFirst.ranAt)}.{" "}
+                {firstMisses.every((c) => c.expected === "pass") ? "Every one refused good work; none paid for bad work. " : ""}Each showed a real fault, written here with its fix.
+              </p>
+              <ul className="mt-4 grid gap-4 md:grid-cols-2">
+                {firstMisses.map((c) => (
+                  <li key={c.id} className="border-l-2 border-fail bg-card px-5 py-4 shadow-card">
+                    <div className="flex items-baseline justify-between gap-2 font-mono text-[11.5px] tracking-[0.08em] text-ink-3 uppercase">
+                      <span>{c.id}</span>
+                      <span className="flex items-baseline gap-2">
+                        Expected <Verdict v={c.expected} /> · First run <Verdict v={c.firstGot ?? null} /> · Now <Verdict v={c.got} />
+                      </span>
+                    </div>
+                    <div className="mt-2 font-serif text-[17px] leading-snug">{c.brief}</div>
+                    <p className="mt-1.5 text-[14.5px] text-ink-2">
+                      <Kind c={c} />
+                      {c.why}.
+                    </p>
+                    {c.cause && <p className="mt-2 text-[14.5px] leading-[1.5] text-ink">{c.cause}</p>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section className="mt-14">
             <h2 className="text-[28px] tracking-[-0.015em]">Every case</h2>

@@ -1,7 +1,7 @@
 // A PDF's text with its paragraphs kept, so code can count pieces and check quotes the same as pasted text.
 // PDFs have no blank lines: a paragraph shows only as a wider gap between lines, so a gap well above the
 // usual line spacing becomes a blank line. A word split at a hyphen across lines is joined again.
-export async function pdfText(bytes: Uint8Array): Promise<string | null> {
+export async function pdfText(bytes: Uint8Array): Promise<{ text: string | null; pages: number }> {
   const { getDocumentProxy } = await import("unpdf");
   const pdf = await getDocumentProxy(bytes);
   const lines: { text: string; y: number; page: number }[] = [];
@@ -33,5 +33,5 @@ export async function pdfText(bytes: Uint8Array): Promise<string | null> {
     out += l.text.trim() === "" ? "" : l.text;
   });
   const text = out.replace(/\n{3,}/g, "\n\n").trim();
-  return text ? text.slice(0, 60000) : null;
+  return { text: text ? text.slice(0, 60000) : null, pages: pdf.numPages };
 }

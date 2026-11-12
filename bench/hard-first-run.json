@@ -1,0 +1,40 @@
+{
+ "ranAt": "2026-11-12T14:48:23.436Z",
+ "cases": {
+  "brunch-one-word-over": {
+   "got": "fail"
+  },
+  "brunch-at-the-limits": {
+   "got": "pass"
+  },
+  "packs-wrong-product": {
+   "got": "fail"
+  },
+  "packs-with-cover-note": {
+   "got": "fail",
+   "cause": "The piece counter counted the cover note, the thank-you and the sign-off as pieces: 6 found where 3 were needed. Fixed: when the pieces have titles, what comes before the first and after the last isn't counted."
+  },
+  "welcome-tone-only": {
+   "got": "fail"
+  },
+  "returns-policy-pdf": {
+   "got": "fail",
+   "cause": "The check \"under 250 words in total\" is about the whole delivery, so there was no line to quote, and a pass without a quote counts as a fail. Fixed: code now measures facts about the delivery as a whole (its kind, pages, size, words in total), and a pass can quote one."
+  },
+  "bakery-image": {
+   "got": "fail",
+   "cause": "The check \"image is square\" had nothing to quote either, and code didn't measure the image. Fixed: code reads the image's width and height and gives them as a fact."
+  },
+  "bakery-image-wrong-day": {
+   "got": "fail"
+  },
+  "yoga-site-link": {
+   "got": "fail",
+   "cause": "The checker saw the page's words but wasn't told they came from a link that loaded, so it failed \"delivered as a working link\". Fixed: the link and its HTTP status are facts."
+  },
+  "faq-as-a-table": {
+   "got": "fail",
+   "cause": "The piece counter didn't know tables and counted the whole table as one piece of 185 words. Fixed: a table is one piece per row."
+  }
+ }
+}

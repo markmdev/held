@@ -2,12 +2,20 @@ import type { Measure } from "../shared/types";
 
 const MARKER = /^\s*(?:\d+[.)]|[-*•])\s+/;
 
-// A delivery's pieces: numbered or bulleted blocks if it has them, otherwise blank-line paragraphs.
+const ROW = /^\s*\|.*\|\s*$/;
+const cells = (row: string) => row.trim().slice(1, -1).split("|").map((c) => c.trim());
+
+// A delivery's pieces: a table's rows, numbered or bulleted blocks if it has them, otherwise blank-line paragraphs.
 // A short lead-in line ending in a colon ("Here are the five descriptions:") isn't a piece.
 export function splitItems(text: string): string[] {
   const lines = text.replace(/\r\n?/g, "\n").split("\n");
   let items: string[];
-  if (lines.filter((l) => MARKER.test(l)).length >= 2) {
+  const rows = lines.filter((l) => ROW.test(l));
+  if (rows.length >= 2) {
+    // The row above a |---|---| line names the columns; every other row is a piece.
+    const rule = rows.findIndex((r) => cells(r).every((c) => /^:?-+:?$/.test(c)));
+    items = rows.filter((_, i) => i !== rule && (rule < 0 || i !== rule - 1)).map((r) => cells(r).join(" "));
+  } else if (lines.filter((l) => MARKER.test(l)).length >= 2) {
     items = [];
     for (const line of lines) {
       if (MARKER.test(line)) items.push(line.replace(MARKER, ""));
@@ -15,19 +23,27 @@ export function splitItems(text: string): string[] {
     }
   } else {
     // A short line on its own, such as a product name or a heading, belongs to the paragraph under it.
+    // A line ending in a comma is a greeting or a sign-off ("Hi Sam,"), not a title.
     items = [];
+    const titled: boolean[] = [];
     let title = "";
     for (const block of text.split(/\n\s*\n/)) {
       const b = block.trim();
       if (!b) continue;
-      if (!b.includes("\n") && words(b) <= 6 && !/[.!?:]["”’)]?$/.test(b)) {
+      const [first, ...rest] = b.split("\n");
+      const heads = (line: string) => words(line) <= 6 && !/[.!?:,]["”’)]?$/.test(line.trim());
+      if (!rest.length && heads(b)) {
         title = title ? `${title} ${b}` : b;
         continue;
       }
+      titled.push(!!title || heads(first));
       items.push(title ? `${title.replace(/^#+\s*|\*\*/g, "")} ${b}` : b);
       title = "";
     }
     if (title) items.push(title);
+    // When the pieces each have a title, what comes before the first and after the last (a cover note,
+    // a thank-you, a sign-off) is the freelancer talking, not the work.
+    if (titled.filter(Boolean).length >= 2) items = items.slice(titled.indexOf(true), titled.lastIndexOf(true) + 1);
     // A plain list, one short line per item with no blank lines between, is one item per line.
     if (items.length === 1) {
       const lines = items[0].split("\n").map((l) => l.trim()).filter(Boolean);

@@ -158,10 +158,10 @@ app.post("/jobs/:id/deliveries", async (c) => {
   const facts = Object.fromEntries(Object.entries(measured).map(([k, m]) => [k, m.fact]));
 
   try {
-    const first = settle(checks, measured, await checkDelivery(c.env.ANTHROPIC_API_KEY, FIRST_MODEL, row.brief, checks, facts, delivery.blocks), delivery.text);
+    const first = settle(checks, measured, await checkDelivery(c.env.ANTHROPIC_API_KEY, FIRST_MODEL, row.brief, checks, facts, delivery.blocks, delivery.form), delivery.text, delivery.form);
     const firstAt = now();
     let second = null as ReturnType<typeof settle> | null;
-    if (first.allPass) second = settle(checks, measured, await checkDelivery(c.env.ANTHROPIC_API_KEY, SECOND_MODEL, row.brief, checks, facts, delivery.blocks), delivery.text);
+    if (first.allPass) second = settle(checks, measured, await checkDelivery(c.env.ANTHROPIC_API_KEY, SECOND_MODEL, row.brief, checks, facts, delivery.blocks, delivery.form), delivery.text, delivery.form);
     const outcome = !first.allPass ? "failed" : second!.allPass ? "passed" : "disagreed";
     const missing = outcome === "disagreed" ? second!.missing : first.missing;
     await c.env.DB.prepare("UPDATE deliveries SET outcome = ?, first_json = ?, second_json = ?, missing_json = ?, first_checked_at = ?, second_checked_at = ? WHERE id = ?")

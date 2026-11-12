@@ -21,6 +21,8 @@ const key = process.env.ANTHROPIC_API_KEY;
 if (!key) throw new Error("Set ANTHROPIC_API_KEY first.");
 const load = (f: string) => JSON.parse(readFileSync(new URL(f, import.meta.url), "utf8")) as Case[];
 const cases: Case[] = [...load("./cases.json"), ...load("./hard.json").map((c) => ({ ...c, hard: true }))];
+// The harder cases' first run is kept as it came out; the fixes its misses led to are in the code this runs.
+const firstRun = JSON.parse(readFileSync(new URL("./hard-first-run.json", import.meta.url), "utf8")) as { ranAt: string; cases: Record<string, { got: "pass" | "fail"; cause?: string }> };
 const only = process.argv.includes("--tuning") ? cases.filter((c) => !c.heldOut && !c.hard) : cases;
 
 const kind = (c: Case): NonNullable<BenchCase["kind"]> => (c.link ? "link" : c.file ? (c.file.type === "application/pdf" ? "pdf" : "image") : "text");
@@ -33,9 +35,9 @@ async function verdict(c: Case): Promise<"pass" | "fail"> {
   excerpts.set(c.id, (d.text ?? `${d.label} (an image; the checker reads it)`).replace(/\s+/g, " ").slice(0, 240));
   const measured = d.text === null ? {} : Object.fromEntries(c.checks.filter((x) => x.measure).map((x) => [x.id, measure(x.measure!, d.text!)]));
   const facts = Object.fromEntries(Object.entries(measured).map(([k, m]) => [k, m.fact]));
-  const first = settle(c.checks, measured, await checkDelivery(key!, FIRST_MODEL, c.brief, c.checks, facts, d.blocks), d.text);
+  const first = settle(c.checks, measured, await checkDelivery(key!, FIRST_MODEL, c.brief, c.checks, facts, d.blocks, d.form), d.text, d.form);
   if (!first.allPass) return "fail";
-  const second = settle(c.checks, measured, await checkDelivery(key!, SECOND_MODEL, c.brief, c.checks, facts, d.blocks), d.text);
+  const second = settle(c.checks, measured, await checkDelivery(key!, SECOND_MODEL, c.brief, c.checks, facts, d.blocks, d.form), d.text, d.form);
   return second.allPass ? "pass" : "fail";
 }
 
@@ -52,14 +54,15 @@ const rows: BenchCase[] = cases.map((c) => {
   return {
     id: c.id, brief: c.brief, deliveryExcerpt: excerpts.get(c.id) ?? (c.delivery ?? c.link ?? c.file!.name).replace(/\s+/g, " ").slice(0, 240),
     expected: c.expected, got: g, right: g === null ? null : g === c.expected, heldOut: c.heldOut, injection: c.injection,
-    ...(c.hard ? { hard: true, kind: kind(c), why: c.why } : {}),
+    ...(c.hard ? { hard: true, kind: kind(c), why: c.why, firstGot: firstRun.cases[c.id].got, ...(firstRun.cases[c.id].cause ? { cause: firstRun.cases[c.id].cause } : {}) } : {}),
   };
 });
 const tally = (xs: BenchCase[]) => ({ right: xs.filter((x) => x.right).length, total: xs.filter((x) => x.right !== null).length });
 const result: BenchResult = {
   ranAt: new Date().toISOString(), cases: rows,
   tuning: tally(rows.filter((r) => !r.heldOut && !r.hard)), heldOut: tally(rows.filter((r) => r.heldOut && !r.hard)), hard: tally(rows.filter((r) => r.hard)),
+  hardFirst: { right: rows.filter((r) => r.hard && r.firstGot === r.expected).length, total: rows.filter((r) => r.hard).length, ranAt: firstRun.ranAt },
 };
 writeFileSync(new URL("./results.json", import.meta.url), JSON.stringify(result, null, 1) + "\n");
 const wrongPays = rows.filter((r) => r.expected === "fail" && r.got === "pass").length;
-console.log(`\nTuning: ${result.tuning.right} of ${result.tuning.total} right. Held back: ${result.heldOut.right} of ${result.heldOut.total} right. Harder cases: ${result.hard.right} of ${result.hard.total} right. Money released on a failing delivery: ${wrongPays}. Checker-instruction cases passed: ${rows.filter((r) => r.injection && r.got === "pass").length} of ${rows.filter((r) => r.injection && r.got).length}.`);
+console.log(`\nTuning: ${result.tuning.right} of ${result.tuning.total} right. Held back: ${result.heldOut.right} of ${result.heldOut.total} right. Harder cases: ${result.hard.right} of ${result.hard.total} right (${result.hardFirst.right} of ${result.hardFirst.total} on their first run, before the fixes its misses led to). Money released on a failing delivery: ${wrongPays}. Checker-instruction cases passed: ${rows.filter((r) => r.injection && r.got === "pass").length} of ${rows.filter((r) => r.injection && r.got).length}.`);

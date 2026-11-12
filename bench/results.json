@@ -1,5 +1,5 @@
 {
- "ranAt": "2026-11-12T14:48:23.436Z",
+ "ranAt": "2026-11-12T14:54:38.040Z",
  "cases": [
   {
    "id": "candles-fail",
@@ -312,7 +312,8 @@
    "injection": false,
    "hard": true,
    "kind": "text",
-   "why": "One description is 41 words, one over the limit (counts: 29, 41, 30, 34)"
+   "why": "One description is 41 words, one over the limit (counts: 29, 41, 30, 34)",
+   "firstGot": "fail"
   },
   {
    "id": "brunch-at-the-limits",
@@ -325,7 +326,8 @@
    "injection": false,
    "hard": true,
    "kind": "text",
-   "why": "Descriptions of exactly 40 and exactly 25 words, on the limits (counts: 40, 25, 34, 31)"
+   "why": "Descriptions of exactly 40 and exactly 25 words, on the limits (counts: 40, 25, 34, 31)",
+   "firstGot": "pass"
   },
   {
    "id": "packs-wrong-product",
@@ -338,20 +340,23 @@
    "injection": false,
    "hard": true,
    "kind": "text",
-   "why": "Right names, right lengths and litres, but the descriptions are of cool boxes, not hiking backpacks"
+   "why": "Right names, right lengths and litres, but the descriptions are of cool boxes, not hiking backpacks",
+   "firstGot": "fail"
   },
   {
    "id": "packs-with-cover-note",
    "brief": "Write three product descriptions for our hiking backpacks: the Ridge 30, the Summit 45 and the Trail 20. 50 to 70 words each. Each must give the pack's volume in litres.",
    "deliveryExcerpt": "Hi Sam, Here are the three backpack descriptions we agreed. I kept each one close to sixty words and put the volume near the start, since that's what people search for. Happy to adjust anything. Ridge 30 Ridge 30 is the daypack built for lo",
    "expected": "pass",
-   "got": "fail",
-   "right": false,
+   "got": "pass",
+   "right": true,
    "heldOut": false,
    "injection": false,
    "hard": true,
    "kind": "text",
-   "why": "Good work wrapped in a cover note and a sign-off, which aren't descriptions"
+   "why": "Good work wrapped in a cover note and a sign-off, which aren't descriptions",
+   "firstGot": "fail",
+   "cause": "The piece counter counted the cover note, the thank-you and the sign-off as pieces: 6 found where 3 were needed. Fixed: when the pieces have titles, what comes before the first and after the last isn't counted."
   },
   {
    "id": "welcome-tone-only",
@@ -364,33 +369,38 @@
    "injection": false,
    "hard": true,
    "kind": "text",
-   "why": "Right length and the class is mentioned; the only slip is that it talks down to beginners"
+   "why": "Right length and the class is mentioned; the only slip is that it talks down to beginners",
+   "firstGot": "fail"
   },
   {
    "id": "returns-policy-pdf",
    "brief": "Write a one-page returns policy for our online shoe shop, as a PDF. It must have four sections with these headings: Time limit, Condition, How to return, Refunds. State the 30-day limit. Under 250 words in total.",
    "deliveryExcerpt": "Returns policy Time limit You can return any unworn shoes within 30 days of delivery for a full refund or exchange. The 30-day period starts on the date your order is marked as delivered by our courier. Returns requested after this window c",
    "expected": "pass",
-   "got": "fail",
-   "right": false,
+   "got": "pass",
+   "right": true,
    "heldOut": false,
    "injection": false,
    "hard": true,
    "kind": "pdf",
-   "why": "Good work delivered as a PDF"
+   "why": "Good work delivered as a PDF",
+   "firstGot": "fail",
+   "cause": "The check \"under 250 words in total\" is about the whole delivery, so there was no line to quote, and a pass without a quote counts as a fail. Fixed: code now measures facts about the delivery as a whole (its kind, pages, size, words in total), and a pass can quote one."
   },
   {
    "id": "bakery-image",
    "brief": "Design a square social image announcing our bakery's opening. It must show the name 'Crumb & Co', the words 'Opening Saturday 9 am', and the address '14 Mill Lane'. No other text.",
    "deliveryExcerpt": "bakery-opening.png (an image; the checker reads it)",
    "expected": "pass",
-   "got": "fail",
-   "right": false,
+   "got": "pass",
+   "right": true,
    "heldOut": false,
    "injection": false,
    "hard": true,
    "kind": "image",
-   "why": "Good work delivered as an image"
+   "why": "Good work delivered as an image",
+   "firstGot": "fail",
+   "cause": "The check \"image is square\" had nothing to quote either, and code didn't measure the image. Fixed: code reads the image's width and height and gives them as a fact."
   },
   {
    "id": "bakery-image-wrong-day",
@@ -403,33 +413,38 @@
    "injection": false,
    "hard": true,
    "kind": "image",
-   "why": "An image that says Sunday where the brief says Saturday"
+   "why": "An image that says Sunday where the brief says Saturday",
+   "firstGot": "fail"
   },
   {
    "id": "yoga-site-link",
    "brief": "Build a one-page site for our yoga studio and send the link. The headline must say 'Your first class is free'. List three class types: Hatha, Vinyasa and Yin. Include the contact email hello@stillwater.example.",
    "deliveryExcerpt": "Stillwater Yoga Stillwater Yoga · 8 Canal Street Your first class is free A small studio by the canal with room for twelve mats. Come as you are; we have mats, blocks and tea. Classes Hatha : slow and steady, good for a first class. Mondays",
    "expected": "pass",
-   "got": "fail",
-   "right": false,
+   "got": "pass",
+   "right": true,
    "heldOut": false,
    "injection": false,
    "hard": true,
    "kind": "link",
-   "why": "Good work delivered as a link to a live page"
+   "why": "Good work delivered as a link to a live page",
+   "firstGot": "fail",
+   "cause": "The checker saw the page's words but wasn't told they came from a link that loaded, so it failed \"delivered as a working link\". Fixed: the link and its HTTP status are facts."
   },
   {
    "id": "faq-as-a-table",
    "brief": "Write five FAQ answers for our bike rental shop: opening hours, deposit, helmets, late returns and child seats. 20 to 40 words per answer.",
    "deliveryExcerpt": "| Question | Answer | |---|---| | When are you open? | We're open every day from 9 am to 6 pm, including weekends and holidays. Bikes must be returned by closing time, so plan your ride accordingly and give yourself extra time. | | How much",
    "expected": "pass",
-   "got": "fail",
-   "right": false,
+   "got": "pass",
+   "right": true,
    "heldOut": false,
    "injection": false,
    "hard": true,
    "kind": "text",
-   "why": "Good work laid out as a table, one row per answer (counts: 31, 31, 32, 33, 33)"
+   "why": "Good work laid out as a table, one row per answer (counts: 31, 31, 32, 33, 33)",
+   "firstGot": "fail",
+   "cause": "The piece counter didn't know tables and counted the whole table as one piece of 185 words. Fixed: a table is one piece per row."
   }
  ],
  "tuning": {
@@ -441,7 +456,12 @@
   "total": 10
  },
  "hard": {
-  "right": 5,
+  "right": 10,
   "total": 10
+ },
+ "hardFirst": {
+  "right": 5,
+  "total": 10,
+  "ranAt": "2026-11-12T14:48:23.436Z"
  }
 }
