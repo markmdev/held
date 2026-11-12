@@ -15,6 +15,8 @@ export type Money = {
   state: MoneyState;
   amount: string;
   capturedAmount?: string;
+  /** When PayPal says the payout reached the freelancer. */
+  payoutDoneAt?: string;
   orderId?: string;
   authorizationId?: string;
   captureId?: string;
@@ -51,7 +53,7 @@ export type Job = {
   deliveries: Delivery[];
 };
 
-export type Stats = { jobsPaid: number; medianSecondsToPaid: number | null; benchRight: number; benchTotal: number };
+export type Stats = { jobsPaid: number; medianSecondsToPaid: number | null; medianSecondsToPayout: number | null; benchRight: number; benchTotal: number };
 export type LedgerRow = Pick<Job, "id" | "title" | "createdAt" | "seeded"> & {
   state: MoneyState;
   /** What the client agreed to pay and PayPal held. */

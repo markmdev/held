@@ -3,7 +3,7 @@ import type { Check, Delivery, Job, LedgerRow, MoneyState, Verdict } from "../sh
 export type JobRow = {
   id: string; title: string; brief: string; amount: string; freelancer_email: string; checks_json: string; created_at: string; seeded: number;
   money_state: MoneyState; captured_amount: string | null; order_id: string | null; authorization_id: string | null; capture_id: string | null;
-  payout_batch_id: string | null; payout_status: string | null; held_at: string | null; paid_at: string | null; cancelled_at: string | null;
+  payout_batch_id: string | null; payout_status: string | null; payout_done_at: string | null; held_at: string | null; paid_at: string | null; cancelled_at: string | null;
 };
 type DeliveryRow = {
   id: string; job_id: string; at: string; label: string; excerpt: string; outcome: Delivery["outcome"];
@@ -18,7 +18,7 @@ export function toJob(r: JobRow, ds: DeliveryRow[]): Job {
     checks: JSON.parse(r.checks_json) as Check[],
     money: {
       state: r.money_state, amount: r.amount, capturedAmount: opt(r.captured_amount), orderId: opt(r.order_id), authorizationId: opt(r.authorization_id),
-      captureId: opt(r.capture_id), payoutBatchId: opt(r.payout_batch_id), payoutStatus: opt(r.payout_status),
+      captureId: opt(r.capture_id), payoutBatchId: opt(r.payout_batch_id), payoutStatus: opt(r.payout_status), payoutDoneAt: opt(r.payout_done_at),
       heldAt: opt(r.held_at), paidAt: opt(r.paid_at), cancelledAt: opt(r.cancelled_at),
     },
     deliveries: ds.map((d) => ({

@@ -48,13 +48,22 @@ app.get("/config", async (c) =>
   }),
 );
 
+function median(xs: number[]) {
+  const s = [...xs].sort((a, b) => a - b);
+  if (!s.length) return null;
+  const m = s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
+  return Math.round(m * 10) / 10;
+}
+
 app.get("/stats", async (c) => {
   const paid = await c.env.DB.prepare("SELECT COUNT(*) AS n FROM jobs WHERE money_state IN ('paid', 'part_paid')").first<{ n: number }>();
   const { results } = await c.env.DB.prepare("SELECT seconds_to_paid AS s FROM deliveries WHERE seconds_to_paid IS NOT NULL ORDER BY s").all<{ s: number }>();
   const s = results.map((r) => r.s);
-  const median = s.length ? (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : null;
+  const { results: payouts } = await c.env.DB.prepare(
+    "SELECT (julianday(j.payout_done_at) - julianday(d.at)) * 86400 AS s FROM jobs j JOIN deliveries d ON d.job_id = j.id WHERE d.seconds_to_paid IS NOT NULL AND j.payout_done_at IS NOT NULL",
+  ).all<{ s: number }>();
   const b = bench as BenchResult;
-  return c.json<Stats>({ jobsPaid: paid?.n ?? 0, medianSecondsToPaid: median === null ? null : Math.round(median * 10) / 10, benchRight: b.tuning.right + b.heldOut.right, benchTotal: b.tuning.total + b.heldOut.total });
+  return c.json<Stats>({ jobsPaid: paid?.n ?? 0, medianSecondsToPaid: median(s), medianSecondsToPayout: median(payouts.map((r) => r.s)), benchRight: b.tuning.right + b.heldOut.right, benchTotal: b.tuning.total + b.heldOut.total });
 });
 
 app.get("/ledger", async (c) => c.json(await ledger(c.env.DB)));
@@ -93,9 +102,10 @@ app.get("/jobs/:id", async (c) => {
   const id = c.req.param("id");
   const row = await getJobRow(c.env.DB, id);
   if (!row) return fail(c, 404, "No job at this link.", "not_found");
-  if (row.payout_batch_id && !["SUCCESS", "FAILED", "RETURNED", "UNCLAIMED", "BLOCKED", "REFUNDED"].includes(row.payout_status ?? "")) {
-    const status = await paypal.payoutStatus(c.env, row.payout_batch_id).catch(() => null);
-    if (status && status !== row.payout_status) await updateJob(c.env.DB, id, { payout_status: status });
+  if (row.payout_batch_id && (row.payout_status !== "SUCCESS" || !row.payout_done_at) && !["FAILED", "RETURNED", "UNCLAIMED", "BLOCKED", "REFUNDED"].includes(row.payout_status ?? "")) {
+    const p = await paypal.payoutStatus(c.env, row.payout_batch_id).catch(() => null);
+    if (p && (p.status !== row.payout_status || (p.status === "SUCCESS" && p.doneAt)))
+      await updateJob(c.env.DB, id, { payout_status: p.status, ...(p.status === "SUCCESS" && p.doneAt ? { payout_done_at: p.doneAt } : {}) });
   }
   return c.json(await getJob(c.env.DB, id));
 });
@@ -223,14 +233,14 @@ app.post("/jobs/:id/cancel", async (c) => {
 
 // PayPal's own word on what happened, checked with PayPal before it's believed.
 app.post("/paypal/webhook", async (c) => {
-  const event = (await c.req.json().catch(() => null)) as { id?: string; event_type?: string; resource?: { id?: string; payout_batch_id?: string; transaction_status?: string } } | null;
+  const event = (await c.req.json().catch(() => null)) as { id?: string; event_type?: string; resource?: { id?: string; payout_batch_id?: string; transaction_status?: string; time_processed?: string } } | null;
   if (!event?.id || !event.event_type) return c.body(null, 400);
   const verified = await paypal.verifyWebhook(c.env, c.req.raw.headers, event).catch(() => false);
   await c.env.DB.prepare("INSERT OR IGNORE INTO paypal_events (id, type, resource_id, at, verified) VALUES (?, ?, ?, ?, ?)").bind(event.id, event.event_type, event.resource?.id ?? null, now(), verified ? 1 : 0).run();
   if (!verified) return c.body(null, 400);
   const r = event.resource ?? {};
   if (event.event_type === "PAYMENT.PAYOUTS-ITEM.SUCCEEDED" && r.payout_batch_id)
-    await c.env.DB.prepare("UPDATE jobs SET payout_status = 'SUCCESS' WHERE payout_batch_id = ?").bind(r.payout_batch_id).run();
+    await c.env.DB.prepare("UPDATE jobs SET payout_status = 'SUCCESS', payout_done_at = COALESCE(payout_done_at, ?) WHERE payout_batch_id = ?").bind(r.time_processed ?? null, r.payout_batch_id).run();
   if (event.event_type === "PAYMENT.AUTHORIZATION.VOIDED" && r.id)
     await c.env.DB.prepare("UPDATE jobs SET money_state = 'cancelled', cancelled_at = COALESCE(cancelled_at, ?) WHERE authorization_id = ? AND money_state = 'held'").bind(now(), r.id).run();
   return c.body(null, 200);

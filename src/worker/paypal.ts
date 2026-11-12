@@ -77,8 +77,9 @@ export async function payout(env: PayPalEnv, jobId: string, email: string, amoun
 }
 
 export async function payoutStatus(env: PayPalEnv, batchId: string) {
-  const p = await call<{ batch_header: { batch_status: string }; items?: { transaction_status?: string }[] }>(env, "GET", `/v1/payments/payouts/${batchId}`);
-  return p.items?.[0]?.transaction_status ?? p.batch_header.batch_status;
+  const p = await call<{ batch_header: { batch_status: string; time_completed?: string }; items?: { transaction_status?: string; time_processed?: string }[] }>(env, "GET", `/v1/payments/payouts/${batchId}`);
+  const item = p.items?.[0];
+  return { status: item?.transaction_status ?? p.batch_header.batch_status, doneAt: item?.time_processed ?? p.batch_header.time_completed ?? null };
 }
 
 export async function verifyWebhook(env: PayPalEnv & { PAYPAL_WEBHOOK_ID?: string }, headers: Headers, event: unknown) {
