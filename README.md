@@ -18,7 +18,7 @@ It's for freelancers who sell work with a clear brief (writing, translation, des
 
 ## Results
 
-- Every job run on the live site is in the [ledger](https://heldpayments.com/ledger), with PayPal's sandbox IDs for its hold, capture and payout.
+- Every job in the [ledger](https://heldpayments.com/ledger) is a real run on the live site, with PayPal's sandbox IDs for its hold, capture and payout.
 - At submission the ledger holds nine jobs, seven of them paid. One is the job paid in the video. Two aren't writing: a design delivered as an image and a one-page site delivered as a link.
 - Median 11.1 seconds from delivery to capture, and 26.8 seconds from delivery to PayPal reporting the payout processed, over those seven paid jobs. Every run on the live site adds to them; the live numbers are at `/api/stats`.
 - 35 of 40 verdicts right on the first run of a test set with an answer key, written on 12 November 2026: 20 of 20 on the cases used while tuning the prompts, 10 of 10 on the cases held back from tuning, and 5 of 10 on ten harder cases written after the checker was finished (near misses, the wrong subject, a slip in tone only, a PDF, two images, a link and odd layouts).
@@ -91,7 +91,7 @@ The video shows one real run on the live site, from the brief to the freelancer 
 
 Everything was built on 12 November 2026, from an empty repo. Every PayPal call moves sandbox money, every verdict is a live Claude call, and every time shown is measured.
 
-Seeded: the example brief and its two sample deliveries; six finished jobs in the ledger, made by running the real flow on the live site before submitting, so each has real sandbox IDs (four paid, one held after a failed delivery, one cancelled); and the test set of 40. The other three jobs in the ledger are real runs made after those six: the one filmed for the video, a design delivered as an image and a one-page site delivered as a link. The six seeded jobs are locked: nobody can deliver on them or move their money.
+Seeded: the example brief and its two sample deliveries; six finished jobs in the ledger, made by running the real flow on the live site before submitting, so each has real sandbox IDs (four paid, one held after a failed delivery, one cancelled); and the test set of 40. The other three jobs in the ledger are real runs made after those six: the one filmed for the video, a design delivered as an image and a one-page site delivered as a link. The six seeded jobs are locked: nobody can deliver on them or move their money. Rehearsal and test runs made while building were taken out of the ledger; their sandbox payments remain in PayPal.
 
 ## Try it
 
