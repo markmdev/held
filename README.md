@@ -43,18 +43,19 @@ The code is in [`src/worker/paypal.ts`](src/worker/paypal.ts).
 
 ## How it uses AI
 
-Claude does three jobs:
+Claude does four jobs:
 
 | Job | Model |
 |---|---|
 | Turns a brief into 3 to 7 checks, each marked "measured" (counted by code) or "judged" | Claude Sonnet 5.5 |
 | First check of a delivery, reading images and PDFs too | Claude Sonnet 5.5 |
 | Second check, a separate call that doesn't see the first verdict; it runs only when the first passes every check | Claude Opus 5.5 |
+| Answers questions about the ledger as AG Studio's agent, and adds a widget with the answer | Claude Sonnet 5.5 |
 
 Four rules hold the verdict before money moves. They're enforced in code ([`src/worker/verdict.ts`](src/worker/verdict.ts)), whatever the model says:
 
 - A pass without a quote from the delivery counts as a fail, unless the check is that something is absent ("no exclamation marks"). A quote from a text delivery must really be in it.
-- Counts in text are measured by code ([`src/worker/measure.ts`](src/worker/measure.ts)), not by the model, and given to Claude as facts.
+- Counts in text and PDFs are measured by code ([`src/worker/measure.ts`](src/worker/measure.ts)), not by the model, and given to Claude as facts.
 - Both checks must pass every item. If they disagree, nothing moves and the client decides.
 - Words inside a delivery that try to instruct the checker fail the delivery, and the freelancer is told to take them out.
 
@@ -121,7 +122,9 @@ ANTHROPIC_API_KEY=... npm run bench              # all 30 cases
 ANTHROPIC_API_KEY=... npm run bench -- --tuning  # only the 20 used while tuning
 ```
 
-It prints each verdict against the answer key and writes `bench/results.json`, which the results page shows. The cases are in [`bench/cases.json`](bench/cases.json).
+It takes about a minute, prints each verdict against the answer key and writes `bench/results.json`, which the results page shows. The cases are in [`bench/cases.json`](bench/cases.json).
+
+`npm test` runs the test of the rule for holds that run out.
 
 **Deploy** to your own Cloudflare account: create a D1 database, put its ID in `wrangler.jsonc`, set the keys with `npx wrangler secret put`, then `npm run db:migrate` and `npm run deploy`.
 
@@ -129,9 +132,11 @@ It prints each verdict against the answer key and writes `bench/results.json`, w
 
 The [ledger](https://held.markmorgan-dev.workers.dev/ledger) is an AG Studio dashboard in Held's theme: totals for money held and paid, the median time to paid, charts of each job's money, of seconds from delivery to paid, and of verdicts, a grid of every job with PayPal's IDs, and Held's own widget, the proof trail, which shows the selected job's PayPal steps and each check's verdict with its quote. The code is in [`src/client/components/studio.tsx`](src/client/components/studio.tsx).
 
+"Ask about the ledger" opens AG Studio's AI assistant beside the dashboard, at laptop width. Its agents run on Claude through an `AgLlmAdapter` ([`src/client/agent.ts`](src/client/agent.ts)) that sends each turn to Held's worker ([`src/worker/agent.ts`](src/worker/agent.ts)), so the key stays on the server. Ask "Which jobs failed, and why?" and it reads the ledger's data, adds a table of the failed jobs with what each is missing, and answers in words, in under a minute.
+
 ## Limits
 
-Sandbox money only. The checker suits work with a clear brief. When the two checks disagree, a person decides.
+Sandbox money only. The checker suits work with a clear brief. When the two checks disagree, a person decides. PayPal keeps a hold for 29 days; one that runs out shows as expired, and the money stays with the client.
 
 ## Licence
 
