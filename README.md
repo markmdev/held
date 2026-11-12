@@ -2,11 +2,9 @@
 
 **Paid the minute the work passes.**
 
-PayPal holds the client's money while a freelancer works. Claude checks the delivered work against the brief both sides agreed, and the freelancer is paid within a minute of passing, with no invoice and no chasing.
-
-Freelancers wait weeks because payment waits for the client to say "done". In Held, nobody has to say it.
-
 **Try it:** https://heldpayments.com
+
+Freelancers wait weeks because payment waits for the client to say "done". In Held, nobody has to say it. PayPal holds the client's money while the freelancer works, Claude checks the delivered work against the brief both sides agreed, and the freelancer is paid within a minute of passing, with no invoice and no chasing.
 
 It's for freelancers who sell work with a clear brief (writing, translation, design assets, small web jobs) and for the clients who hire them without knowing them. In the Freelancers Union's 2015 survey of 5,358 freelancers ([the report](https://www.onlabor.org/wp-content/uploads/2017/05/FU_NonpaymentReport_r3.pdf)), one in two had trouble getting paid in 2014, and the longest wait averaged 98 days. A client who pays up front has the opposite risk: poor work, already paid for.
 
@@ -102,6 +100,8 @@ Seeded: the example brief and its two sample deliveries; six finished jobs in th
 3. On the job's page, press the PayPal button and log in with PayPal's sandbox buyer: `client@held.example.com`, password `HeldJudge2026!` (also printed beside the button).
 4. Deliver "A draft that falls short": the money stays held, and you see what's missing.
 5. Deliver "The finished work": every check passes, and the freelancer is paid.
+
+To see the freelancer's side, open the job's link in a private window: the same page, without the client's buttons.
 
 It takes about two minutes, most of it PayPal's login. You can also write your own brief and deliver your own work. The live site allows 200 checks a day, to keep it open to everyone.
 
