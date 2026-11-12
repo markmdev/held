@@ -220,7 +220,7 @@ function places(jobs: number) {
     "seconds-to-paid": at(9, 6, 7, 18),
     verdicts: at(16, 6, 8, 18),
     grid: at(0, 24, 24, grid),
-    proof: at(0, 24 + grid, 24, 20),
+    proof: at(0, 24 + grid, 24, 22),
   };
   const phone: typeof laptop = {
     "held-now": at(0, 0, 12, 6),
@@ -312,11 +312,11 @@ const VERDICT_BY_WORD = Object.fromEntries(Object.entries(VERDICT_WORDS).map(([k
 const MONEY_TEXT: Record<LedgerRow["state"], string> = { awaiting_hold: "text-ink-3", held: "text-held", paid: "text-paid", part_paid: "text-paid", cancelled: "text-ink-3" };
 const VERDICT_TEXT: Record<LedgerRow["verdict"], string> = { checking: "text-ink-2", passed: "text-paid", failed: "text-fail", disagreed: "text-ask", none: "text-ink-3" };
 
-// The table sizes each column to its values as plain 13px text, so a cell's words must not set wider than that: 12px with next to no tracking.
+// The table sizes each column to its values as plain 13px text, so a cell's words must not set wider than that: 11.5px with next to no tracking.
 function wordCell(tones: (word: string) => string | undefined) {
   return (p: { value?: string }) => {
     const tone = tones(p.value ?? "");
-    return <span className={tone ? `text-[12px] font-semibold tracking-[0.02em] uppercase ${tone}` : "text-[12.5px] text-ink-2"}>{p.value || "–"}</span>;
+    return <span className={tone ? `text-[11.5px] font-semibold tracking-[0.02em] uppercase ${tone}` : "text-[12.5px] text-ink-2"}>{p.value || "–"}</span>;
   };
 }
 const CELLS: Record<string, ReturnType<typeof wordCell>> = {
