@@ -88,7 +88,7 @@ The video shows one real run on the live site, from the brief to the freelancer 
 
 Everything was built on 12 November 2026, from an empty repo. Every PayPal call moves sandbox money, every verdict is a live Claude call, and every time shown is measured.
 
-Seeded: the example brief and its two sample deliveries; six finished jobs in the ledger, made by running the real flow on the live site before submitting, so each has real sandbox IDs (four paid, one held after a failed delivery, one cancelled); and the test set of 30.
+Seeded: the example brief and its two sample deliveries; six finished jobs in the ledger, made by running the real flow on the live site before submitting, so each has real sandbox IDs (four paid, one held after a failed delivery, one cancelled); and the test set of 40.
 
 ## Try it
 
