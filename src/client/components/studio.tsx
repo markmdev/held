@@ -103,18 +103,31 @@ const stamp = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric",
 const clock = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" });
 
 // A chart gives its axis labels under a third of its width: about this many letters at 11px.
+// A longer title is shortened to its first whole words, so no name is cut mid-word; the table has the full titles.
 const AXIS_LETTERS = 19;
-const cut = (text: string, letters: number) => (text.length > letters ? `${text.slice(0, letters - 1).trimEnd()}…` : text);
+function shortName(title: string, letters: number) {
+  if (title.length <= letters) return title;
+  const [first, ...rest] = title.split(" ");
+  let name = first.slice(0, letters);
+  for (const word of rest) {
+    if (name.length + 1 + word.length > letters) break;
+    name += ` ${word}`;
+  }
+  return name;
+}
 
 export function ledgerData(rows: LedgerRow[]): AgDataSourcesDefinition {
-  // Charts group by their category, so each job's label must be its own: jobs with the same title get a number.
+  // Charts group by their category, so each job's label must be its own: jobs with the same title share a short name and get a number.
   // Jobs all started on one day are told apart by the time alone.
   const startedAs = new Set(rows.map((r) => new Date(r.createdAt).toDateString())).size > 1 ? stamp : clock;
+  const copies = new Map<string, number>();
+  for (const r of rows) copies.set(r.title, (copies.get(r.title) ?? 0) + 1);
   const seen = new Map<string, number>();
   const labels = [...rows].reverse().map((r) => {
     const n = (seen.get(r.title) ?? 0) + 1;
     seen.set(r.title, n);
-    return n > 1 ? `${cut(r.title, AXIS_LETTERS - 4)} (${n})` : cut(r.title, AXIS_LETTERS);
+    const name = shortName(r.title, copies.get(r.title)! > 1 ? AXIS_LETTERS - 4 : AXIS_LETTERS);
+    return n > 1 ? `${name} (${n})` : name;
   }).reverse();
   const jobs = rows.map((r, i) => {
     const amount = Number(r.amount);
