@@ -7,6 +7,7 @@ import { dailyLeft, getJob, getJobRow, ledger, takeDaily, updateJob } from "./db
 import { measure, type Measured } from "./measure";
 import * as paypal from "./paypal";
 import { settle } from "./verdict";
+import { pdfText } from "./pdf";
 
 type Env = {
   DB: D1Database;
@@ -131,20 +132,12 @@ app.post("/jobs/:id/authorize", async (c) => {
 
 type Incoming = { text?: string; link?: string; file?: { name: string; type: string; base64: string } };
 
-// A PDF's text, so code can count it and check quotes against it; null for a scan with no text layer.
-async function pdfText(base64: string) {
-  const { extractText, getDocumentProxy } = await import("unpdf");
-  const pdf = await getDocumentProxy(Uint8Array.from(atob(base64), (ch) => ch.charCodeAt(0)));
-  const { text } = await extractText(pdf, { mergePages: true });
-  return text.trim() ? text.slice(0, 60000) : null;
-}
-
 async function readDelivery(d: Incoming): Promise<{ label: string; text: string | null; blocks: Record<string, unknown>[] }> {
   if (d.text?.trim()) return { label: "Pasted text", text: d.text.slice(0, 60000), blocks: [{ type: "text", text: d.text.slice(0, 60000) }] };
   if (d.file?.base64) {
     const { name, type, base64 } = d.file;
     if (base64.length > 7_000_000) throw new Error("bad: The file is over 5 MB.");
-    if (type === "application/pdf") return { label: name, text: await pdfText(base64), blocks: [{ type: "document", source: { type: "base64", media_type: type, data: base64 } }] };
+    if (type === "application/pdf") return { label: name, text: await pdfText(Uint8Array.from(atob(base64), (ch) => ch.charCodeAt(0))), blocks: [{ type: "document", source: { type: "base64", media_type: type, data: base64 } }] };
     if (/^image\/(png|jpeg|gif|webp)$/.test(type)) return { label: name, text: null, blocks: [{ type: "image", source: { type: "base64", media_type: type, data: base64 } }] };
     if (type.startsWith("text/") || /\.(txt|md|csv|html?)$/i.test(name)) {
       const text = new TextDecoder().decode(Uint8Array.from(atob(base64), (ch) => ch.charCodeAt(0))).slice(0, 60000);
