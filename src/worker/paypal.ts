@@ -47,10 +47,10 @@ export async function createOrder(env: PayPalEnv, jobId: string, title: string, 
 }
 
 export async function authorizeOrder(env: PayPalEnv, orderId: string) {
-  const o = await call<{ purchase_units: { payments?: { authorizations?: { id: string; status: string }[] } }[] }>(env, "POST", `/v2/checkout/orders/${orderId}/authorize`, {}, `auth-${orderId}`);
+  const o = await call<{ purchase_units: { payments?: { authorizations?: { id: string; status: string; expiration_time?: string }[] } }[] }>(env, "POST", `/v2/checkout/orders/${orderId}/authorize`, {}, `auth-${orderId}`);
   const a = o.purchase_units?.[0]?.payments?.authorizations?.[0];
   if (!a) throw new PayPalError("PayPal returned no hold for this order.");
-  return a.id;
+  return { id: a.id, expiresAt: a.expiration_time ?? null };
 }
 
 export async function capture(env: PayPalEnv, authorizationId: string, amount: string | null, requestId: string) {

@@ -159,6 +159,16 @@ export function ActionPanel({ job, actions, hold }: { job: Job; actions: JobActi
   const disagreed = last?.outcome === "disagreed";
   const busy = !!actions.busy || last?.outcome === "checking";
 
+  if (job.money.expired)
+    return (
+      <section className="card p-5 text-[15px] text-ink-2">
+        <div className="label">This hold ran out</div>
+        <p className="mt-2">PayPal keeps a hold for 29 days. This one reached its end before the work passed, so the money stayed with the client. Start a sample job to see a hold placed and paid.</p>
+        <Link href="/new?example=1" className="btn btn-quiet mt-4 w-full">
+          Try a sample job
+        </Link>
+      </section>
+    );
   if (st === "paid" || st === "part_paid" || st === "cancelled")
     return (
       <section className="card p-5 text-[15px] text-ink-2">

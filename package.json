@@ -8,7 +8,8 @@
     "deploy": "npm run build && wrangler deploy",
     "db:migrate": "wrangler d1 migrations apply held --remote",
     "db:migrate:local": "wrangler d1 migrations apply held --local",
-    "bench": "tsx bench/run.ts"
+    "bench": "tsx bench/run.ts",
+    "test": "tsx --test src/worker/*.test.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.5",

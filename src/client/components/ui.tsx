@@ -99,8 +99,8 @@ const MONEY: Record<MoneyState, { label: string; cls: string; dot: string }> = {
   cancelled: { label: "Cancelled", cls: "bg-off-bg text-off", dot: "bg-ink-3" },
 };
 
-export function MoneyPill({ state, className }: { state: MoneyState; className?: string }) {
-  const m = MONEY[state];
+export function MoneyPill({ state, expired, className }: { state: MoneyState; expired?: boolean; className?: string }) {
+  const m = expired ? { ...MONEY[state], label: "Expired" } : MONEY[state];
   return (
     <span className={cx("inline-flex items-center gap-1.5 rounded-[3px] px-2 py-1 font-mono text-[11.5px] font-semibold tracking-[0.1em] uppercase", m.cls, className)}>
       <span className={cx("h-2 w-2 rounded-full", m.dot)} />

@@ -85,6 +85,7 @@ export const heldTheme = studioTheme.withParams({
 /* ---------- data: one row per job, in words people use ---------- */
 
 const MONEY_WORDS: Record<LedgerRow["state"], string> = { awaiting_hold: "Not held yet", held: "Held", paid: "Paid", part_paid: "Part paid", cancelled: "Cancelled" };
+const EXPIRED = "Expired";
 const VERDICT_WORDS: Record<LedgerRow["verdict"], string> = { checking: "Checking", passed: "Passed", failed: "Not yet", disagreed: "Checks disagree", none: "No delivery" };
 
 const VERDICT_MEASURES: [LedgerRow["verdict"], string][] = [
@@ -121,7 +122,7 @@ export function ledgerData(rows: LedgerRow[]): AgDataSourcesDefinition {
       job: r.title,
       label: labels[i],
       started,
-      money: MONEY_WORDS[r.state],
+      money: r.expired ? EXPIRED : MONEY_WORDS[r.state],
       amount,
       paidOut: r.state === "paid" || r.state === "part_paid" ? amount : 0,
       heldNow: r.state === "held" ? price : 0,
@@ -306,7 +307,7 @@ function ledgerReport(widgetLayout: Record<string, AgWidgetLayoutState>): AgRepo
 
 /* ---------- the grid's cells: the same pills as the rest of Held ---------- */
 
-const STATE_BY_WORD = Object.fromEntries(Object.entries(MONEY_WORDS).map(([k, w]) => [w, k])) as Record<string, LedgerRow["state"]>;
+const STATE_BY_WORD = { ...Object.fromEntries(Object.entries(MONEY_WORDS).map(([k, w]) => [w, k])), [EXPIRED]: "cancelled" } as Record<string, LedgerRow["state"]>;
 const VERDICT_BY_WORD = Object.fromEntries(Object.entries(VERDICT_WORDS).map(([k, w]) => [w, k])) as Record<string, LedgerRow["verdict"]>;
 
 const MONEY_TEXT: Record<LedgerRow["state"], string> = { awaiting_hold: "text-ink-3", held: "text-held", paid: "text-paid", part_paid: "text-paid", cancelled: "text-ink-3" };
@@ -368,7 +369,7 @@ function ProofBody({ job, picked }: { job: Job; picked: boolean }) {
   const last = job.deliveries.at(-1);
   const steps: { label: string; id?: string; note?: string; done: boolean }[] = [
     { label: "Hold placed", id: m.authorizationId, note: m.heldAt && when(m.heldAt), done: !!m.authorizationId },
-    { label: m.state === "cancelled" ? "Hold cancelled" : "Money taken from the hold", id: m.captureId, note: m.cancelledAt ? when(m.cancelledAt) : m.capturedAmount && money(m.capturedAmount), done: !!m.captureId || m.state === "cancelled" },
+    { label: m.expired ? "Hold ran out at PayPal" : m.state === "cancelled" ? "Hold cancelled" : "Money taken from the hold", id: m.captureId, note: m.cancelledAt ? when(m.cancelledAt) : m.capturedAmount && money(m.capturedAmount), done: !!m.captureId || m.state === "cancelled" },
     { label: "Paid to the freelancer", id: m.payoutBatchId, note: m.payoutStatus && (m.payoutStatus === "SUCCESS" ? "sent" : ["PENDING", "PROCESSING"].includes(m.payoutStatus) ? "sending" : m.payoutStatus.toLowerCase()), done: !!m.payoutBatchId },
   ];
   return (
@@ -380,7 +381,7 @@ function ProofBody({ job, picked }: { job: Job; picked: boolean }) {
         {job.title}
       </Link>
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
-        <MoneyPill state={m.state} className="!py-0.5" />
+        <MoneyPill state={m.state} expired={m.expired} className="!py-0.5" />
         {last && <OutcomePill outcome={last.outcome} className="!py-0.5" />}
         {last?.secondsToPaid != null && <span className="font-mono text-[12px] font-semibold text-paid">Paid in {seconds(last.secondsToPaid)}</span>}
       </div>

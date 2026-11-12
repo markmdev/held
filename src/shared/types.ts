@@ -15,6 +15,10 @@ export type Money = {
   state: MoneyState;
   amount: string;
   capturedAmount?: string;
+  /** When PayPal ends the hold if nothing takes or cancels it first: 29 days after it was placed. */
+  holdExpiresAt?: string;
+  /** True when a cancelled hold ran out at PayPal, rather than being cancelled by the client. */
+  expired?: boolean;
   /** When PayPal says the payout reached the freelancer. */
   payoutDoneAt?: string;
   orderId?: string;
@@ -56,6 +60,8 @@ export type Job = {
 export type Stats = { jobsPaid: number; medianSecondsToPaid: number | null; medianSecondsToPayout: number | null; benchRight: number; benchTotal: number };
 export type LedgerRow = Pick<Job, "id" | "title" | "createdAt" | "seeded"> & {
   state: MoneyState;
+  /** True when a cancelled hold ran out at PayPal, rather than being cancelled by the client. */
+  expired?: boolean;
   /** What the client agreed to pay and PayPal held. */
   price: string;
   /** The held price, or what was taken from the hold once it's paid. */

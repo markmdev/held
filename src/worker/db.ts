@@ -1,9 +1,11 @@
 import type { Check, Delivery, Job, LedgerRow, MoneyState, Verdict } from "../shared/types";
+import { expireHold, holdExpired } from "./expiry";
 
 export type JobRow = {
   id: string; title: string; brief: string; amount: string; freelancer_email: string; checks_json: string; created_at: string; seeded: number;
   money_state: MoneyState; captured_amount: string | null; order_id: string | null; authorization_id: string | null; capture_id: string | null;
   payout_batch_id: string | null; payout_status: string | null; payout_done_at: string | null; held_at: string | null; paid_at: string | null; cancelled_at: string | null;
+  hold_expires_at: string | null;
 };
 type DeliveryRow = {
   id: string; job_id: string; at: string; label: string; excerpt: string; outcome: Delivery["outcome"];
@@ -20,6 +22,7 @@ export function toJob(r: JobRow, ds: DeliveryRow[]): Job {
       state: r.money_state, amount: r.amount, capturedAmount: opt(r.captured_amount), orderId: opt(r.order_id), authorizationId: opt(r.authorization_id),
       captureId: opt(r.capture_id), payoutBatchId: opt(r.payout_batch_id), payoutStatus: opt(r.payout_status), payoutDoneAt: opt(r.payout_done_at),
       heldAt: opt(r.held_at), paidAt: opt(r.paid_at), cancelledAt: opt(r.cancelled_at),
+      holdExpiresAt: opt(r.hold_expires_at), ...(holdExpired(r) ? { expired: true } : {}),
     },
     deliveries: ds.map((d) => ({
       id: d.id, at: d.at, label: d.label, excerpt: d.excerpt, outcome: d.outcome,
@@ -29,8 +32,19 @@ export function toJob(r: JobRow, ds: DeliveryRow[]): Job {
   };
 }
 
+// Rows come out with a hold that has run out already marked so, and that is stored as it's seen.
+async function expired<T extends JobRow>(db: D1Database, rows: T[]): Promise<T[]> {
+  const now = Date.now();
+  const out = rows.map((r) => expireHold(r, now));
+  const changed = out.filter((r, i) => r !== rows[i]);
+  if (changed.length)
+    await db.batch(changed.map((r) => db.prepare("UPDATE jobs SET money_state = 'cancelled', cancelled_at = ? WHERE id = ? AND money_state = 'held'").bind(r.cancelled_at, r.id)));
+  return out;
+}
+
 export async function getJobRow(db: D1Database, id: string) {
-  return db.prepare("SELECT * FROM jobs WHERE id = ?").bind(id).first<JobRow>();
+  const row = await db.prepare("SELECT * FROM jobs WHERE id = ?").bind(id).first<JobRow>();
+  return row && (await expired(db, [row]))[0];
 }
 
 export async function getJob(db: D1Database, id: string): Promise<Job | null> {
@@ -52,8 +66,8 @@ export async function ledger(db: D1Database): Promise<LedgerRow[]> {
       (SELECT missing_json FROM deliveries d WHERE d.job_id = j.id ORDER BY d.at DESC LIMIT 1) AS last_missing,
       (SELECT MIN(seconds_to_paid) FROM deliveries d WHERE d.job_id = j.id) AS secs
     FROM jobs j WHERE j.money_state != 'awaiting_hold' OR j.seeded = 1 ORDER BY j.created_at DESC LIMIT 500`).all<JobRow & { last_outcome: Delivery["outcome"] | null; last_missing: string | null; secs: number | null }>();
-  return results.map((r) => ({
-    id: r.id, title: r.title, createdAt: r.created_at, seeded: !!r.seeded, state: r.money_state, price: r.amount, amount: r.captured_amount ?? r.amount,
+  return (await expired(db, results)).map((r) => ({
+    id: r.id, title: r.title, createdAt: r.created_at, seeded: !!r.seeded, state: r.money_state, ...(holdExpired(r) ? { expired: true } : {}), price: r.amount, amount: r.captured_amount ?? r.amount,
     verdict: r.last_outcome ?? "none", missing: r.last_missing ? (JSON.parse(r.last_missing) as string[]) : [], secondsToPaid: r.secs, authorizationId: opt(r.authorization_id), captureId: opt(r.capture_id), payoutBatchId: opt(r.payout_batch_id),
   }));
 }

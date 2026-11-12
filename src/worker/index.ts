@@ -128,8 +128,8 @@ app.post("/jobs/:id/authorize", async (c) => {
   const row = await getJobRow(c.env.DB, c.req.param("id"));
   if (!row) return fail(c, 404, "No job at this link.", "not_found");
   if (row.money_state !== "awaiting_hold" || !row.order_id) return fail(c, 409, "There's no PayPal approval waiting for this job.");
-  const authorizationId = await paypal.authorizeOrder(c.env, row.order_id);
-  await updateJob(c.env.DB, row.id, { authorization_id: authorizationId, money_state: "held", held_at: now() });
+  const hold = await paypal.authorizeOrder(c.env, row.order_id);
+  await updateJob(c.env.DB, row.id, { authorization_id: hold.id, hold_expires_at: hold.expiresAt, money_state: "held", held_at: now() });
   return c.json(await getJob(c.env.DB, row.id));
 });
 

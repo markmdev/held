@@ -4,13 +4,14 @@ import { cx, money, SeededTag, seconds, useCopy, when } from "./ui";
 
 /* ---------- the stamp ---------- */
 
-type StampKind = "held" | "paid" | "part" | "cancelled" | "ask" | "awaiting";
+type StampKind = "held" | "paid" | "part" | "cancelled" | "expired" | "ask" | "awaiting";
 
 const STAMP: Record<StampKind, { word: string; cls: string }> = {
   held: { word: "Held", cls: "text-held-dot" },
   paid: { word: "Paid", cls: "text-paid" },
   part: { word: "Part paid", cls: "text-paid" },
   cancelled: { word: "Cancelled", cls: "text-ink-3" },
+  expired: { word: "Expired", cls: "text-ink-3" },
   ask: { word: "Your call", cls: "text-ask" },
   awaiting: { word: "Not held", cls: "text-ink-3" },
 };
@@ -30,6 +31,7 @@ export function stampFor(job: Job): StampKind {
   const last = job.deliveries.at(-1);
   const map: Record<MoneyState, StampKind> = { awaiting_hold: "awaiting", held: "held", paid: "paid", part_paid: "part", cancelled: "cancelled" };
   if (job.money.state === "held" && last?.outcome === "disagreed") return "ask";
+  if (job.money.expired) return "expired";
   return map[job.money.state];
 }
 
@@ -144,7 +146,7 @@ export function Receipt({ job, compact = false }: { job: Job; compact?: boolean 
           <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden>
             <rect x="3" y="5" width="6" height="22" rx="3" fill="currentColor" />
             <rect x="23" y="5" width="6" height="22" rx="3" fill="currentColor" />
-            <circle cx="16" cy="16" r="6.5" fill={kind === "paid" || kind === "part" ? "var(--color-paid-dot)" : kind === "cancelled" ? "var(--color-ink-3)" : "var(--color-held-dot)"} />
+            <circle cx="16" cy="16" r="6.5" fill={kind === "paid" || kind === "part" ? "var(--color-paid-dot)" : kind === "cancelled" || kind === "expired" ? "var(--color-ink-3)" : "var(--color-held-dot)"} />
           </svg>
           held
         </div>
@@ -259,7 +261,7 @@ export function Timeline({ job }: { job: Job }) {
     }),
   );
   if (m.paidAt) items.push({ at: m.paidAt, text: m.state === "part_paid" ? <>{money(m.capturedAmount)} released</> : <>{money(m.capturedAmount ?? m.amount)} paid to the freelancer</>, tone: "bg-paid-dot" });
-  if (m.cancelledAt) items.push({ at: m.cancelledAt, text: "Hold cancelled", tone: "bg-ink-3" });
+  if (m.cancelledAt) items.push({ at: m.cancelledAt, text: m.expired ? "Hold ran out at PayPal" : "Hold cancelled", tone: "bg-ink-3" });
   return (
     <ol className="border-l-[1.5px] border-line font-mono text-[12.5px]">
       {items.map((it, i) => (
