@@ -131,7 +131,7 @@ export function NewJob() {
                         className="field py-2"
                         value={c.text}
                         aria-label={`Check ${i + 1}`}
-                        onChange={(e) => setChecks(checks.map((x) => (x.id === c.id ? { ...x, text: e.target.value } : x)))}
+                        onChange={(e) => setChecks(checks.map((x) => (x.id === c.id ? { id: x.id, text: e.target.value, kind: "judged" } : x)))}
                       />
                       <span className="hidden shrink-0 rounded-md bg-line-2 px-1.5 py-0.5 text-[11px] font-semibold text-ink-2 sm:inline">
                         {c.kind === "measured" ? "Measured" : "Judged"}
