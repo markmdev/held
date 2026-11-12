@@ -3,7 +3,7 @@ import type { BenchCase } from "../../shared/types";
 import { cx, Empty, Page, Spinner, when } from "../components/ui";
 
 const RULES = [
-  ["No quote, no pass.", "A line passes only on words quoted from the work, and a quote that isn't in the delivery fails it. A check that something is absent needs no quote."],
+  ["No quote, no pass.", "A line passes only on words quoted from the work or on a fact code measured about it, and a quote that's in neither fails it. A check that something is absent needs no quote."],
   ["Counts are measured by code.", "How many pieces, how many words, whether a phrase appears: in text, PDFs and linked pages, code counts them, and Claude isn't asked."],
   ["Two separate checks must agree.", "When every line passes, a second check reads the work again on its own. If the two disagree, the client decides."],
   ["Instructions in the work count against it.", "A delivery that tells the checker to pass it isn't obeyed. It fails until that text is taken out."],
@@ -179,10 +179,10 @@ export function Results() {
             ) : (
               <ul className="mt-4 grid gap-4 md:grid-cols-2">
                 {misses.map((c) => (
-                  <li key={c.id} className="border-l-2 border-fail bg-card px-5 py-4 shadow-card">
-                    <div className="flex items-baseline justify-between gap-2 font-mono text-[11.5px] tracking-[0.08em] text-ink-3 uppercase">
+                  <li key={c.id} className="min-w-0 border-l-2 border-fail bg-card px-5 py-4 shadow-card">
+                    <div className="flex flex-col gap-1 font-mono text-[11.5px] tracking-[0.08em] text-ink-3 uppercase sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
                       <span>{c.id}</span>
-                      <span className="flex items-baseline gap-2">
+                      <span className="flex items-baseline gap-2 whitespace-nowrap">
                         Expected <Verdict v={c.expected} /> · Got <Verdict v={c.got} />
                       </span>
                     </div>
@@ -207,11 +207,11 @@ export function Results() {
               </p>
               <ul className="mt-4 grid gap-4 md:grid-cols-2">
                 {firstMisses.map((c) => (
-                  <li key={c.id} className="border-l-2 border-fail bg-card px-5 py-4 shadow-card">
-                    <div className="flex items-baseline justify-between gap-2 font-mono text-[11.5px] tracking-[0.08em] text-ink-3 uppercase">
+                  <li key={c.id} className="min-w-0 border-l-2 border-fail bg-card px-5 py-4 shadow-card">
+                    <div className="flex flex-col gap-1 font-mono text-[11.5px] tracking-[0.08em] text-ink-3 uppercase sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
                       <span>{c.id}</span>
-                      <span className="flex items-baseline gap-2">
-                        Expected <Verdict v={c.expected} /> · First run <Verdict v={c.firstGot ?? null} /> · Now <Verdict v={c.got} />
+                      <span className="flex flex-wrap items-baseline gap-x-2 whitespace-nowrap">
+                        <span>Expected <Verdict v={c.expected} /></span>·<span>First run <Verdict v={c.firstGot ?? null} /></span>·<span>Now <Verdict v={c.got} /></span>
                       </span>
                     </div>
                     <div className="mt-2 font-serif text-[17px] leading-snug">{c.brief}</div>
