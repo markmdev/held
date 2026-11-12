@@ -3,7 +3,7 @@ import { AgStudio, AgStudioProvider } from "ag-studio-react";
 import { useMemo, type CSSProperties } from "react";
 import { Link } from "wouter";
 import { useLedger } from "../api";
-import { heldTheme, LEDGER_HEIGHT, ledgerBreakpoints, ledgerData, ledgerReport, ledgerWidgets } from "../components/studio";
+import { heldTheme, ledgerData, ledgerLayout, ledgerWidgets } from "../components/studio";
 import { Empty, Page, Spinner } from "../components/ui";
 
 if (import.meta.env.DEV) enableStudioDevValidations();
@@ -11,7 +11,8 @@ if (import.meta.env.DEV) enableStudioDevValidations();
 export function Ledger() {
   const { data: rows, error, reload } = useLedger();
   const data = useMemo(() => (rows ? ledgerData(rows) : undefined), [rows]);
-  const initialState = useMemo(ledgerReport, []);
+  const jobs = rows?.length ?? 0;
+  const layout = useMemo(() => ledgerLayout(jobs), [jobs]);
 
   return (
     <Page>
@@ -45,16 +46,17 @@ export function Ledger() {
           </Empty>
         ) : (
           <AgStudioProvider>
-            <div className="-mx-[14px] h-(--phone) md:h-(--laptop)" style={{ "--phone": `${LEDGER_HEIGHT.phone}px`, "--laptop": `${LEDGER_HEIGHT.laptop}px` } as CSSProperties}>
+            <div className="-mx-[14px] h-(--phone) md:h-(--laptop)" style={{ "--phone": `${layout.height.phone}px`, "--laptop": `${layout.height.laptop}px` } as CSSProperties}>
               <AgStudio
+                key={jobs}
                 theme={heldTheme}
                 data={data}
-                initialState={initialState}
+                initialState={layout.report}
                 widgets={ledgerWidgets}
                 context={{ rows }}
                 mode="view"
                 panels={{ view: { left: [], right: [] } }}
-                responsiveLayoutBreakpoints={ledgerBreakpoints}
+                responsiveLayoutBreakpoints={layout.breakpoints}
                 style={{ height: "100%" }}
               />
             </div>

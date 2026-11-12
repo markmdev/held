@@ -50,4 +50,5 @@ Everything else is ink on paper: `ink`, `ink-2`, `ink-3` for text, `line` and `l
 - Laptop (1440) and phone (390) are both first-class, on one page width (`max-w-7xl`).
 - The job page on a laptop: what happened on the left, the receipt in the middle, what each side can do on the right. On a phone: the receipt, then what to do, then what happened; before the money is held, what to do comes first.
 - On a phone the stamp gets its own room above the total instead of covering it.
+- The ledger is one dashboard: figures, three charts, the table of every job at full width and as tall as its jobs (up to ten, then it scrolls), and under it the proof of the job you pick. Chart axes show the time alone while every job is from one day.
 - PayPal draws its own button; style around it, never inside it.

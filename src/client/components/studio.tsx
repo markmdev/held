@@ -1,6 +1,5 @@
 import { studioTheme, type AgDataSourcesDefinition, type AgResponsiveLayoutBreakpoint, type AgReportState, type AgWidgetLayoutState, type AgWidgetParams } from "ag-studio";
 import { createWidgets } from "ag-studio-react";
-import type { CustomCellRendererProps } from "ag-grid-react";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { useJob } from "../api";
@@ -10,6 +9,9 @@ import { cx, money, MoneyPill, OutcomePill, seconds, Spinner, when } from "./ui"
 /* ---------- theme: Held's tokens, so the dashboard reads as part of the page ---------- */
 
 const ROW = 18;
+const GRID_ROW = 44;
+// The table's title, header row and padding.
+const GRID_CHROME = 106;
 const v = (name: string) => `var(--color-${name})`;
 const line = (name: string) => ({ width: 1, color: v(name) });
 const MONO = "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
@@ -17,7 +19,7 @@ const SERIF = "Newsreader, Georgia, 'Times New Roman', serif";
 
 // Charts take the palette in the order of their measures, so every chart lists its measures in this order:
 // paid green, held amber, grey, failed red, disagree violet.
-const PALETTE = ["#2a9d5c", "#d08a12", "#b9b4aa", "#b42318", "#5a3fd1"];
+const PALETTE = ["#2f7d4f", "#c98a1e", "#cbc4b3", "#b42318", "#5a3fd1"];
 
 export const heldTheme = studioTheme.withParams({
   fontFamily: MONO,
@@ -65,7 +67,7 @@ export const heldTheme = studioTheme.withParams({
   gridHeaderTextColor: v("ink-3"),
   gridHeaderFontWeight: 500,
   gridHeaderFontSize: 10.5,
-  gridRowHeight: 44,
+  gridRowHeight: GRID_ROW,
   gridRowBorder: { ...line("line"), style: "dashed" },
   gridHeaderRowBorder: line("line"),
   gridRowHoverColor: v("paper"),
@@ -97,12 +99,15 @@ const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD",
 const secs = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
 const inSeconds = (n: number) => `${secs.format(n)} s`;
 const stamp = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const clock = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" });
 
 export function ledgerData(rows: LedgerRow[]): AgDataSourcesDefinition {
   // Charts group by their category, so each job's label must be its own: jobs started in the same minute get a number.
+  // Jobs all started on one day are told apart by the time alone.
+  const startedAs = new Set(rows.map((r) => new Date(r.createdAt).toDateString())).size > 1 ? stamp : clock;
   const seen = new Map<string, number>();
   const labels = [...rows].reverse().map((r) => {
-    const base = stamp.format(new Date(r.createdAt));
+    const base = startedAs.format(new Date(r.createdAt));
     const n = (seen.get(base) ?? 0) + 1;
     seen.set(base, n);
     return n > 1 ? `${base} (${n})` : base;
@@ -115,7 +120,6 @@ export function ledgerData(rows: LedgerRow[]): AgDataSourcesDefinition {
       id: r.id,
       job: r.title,
       label: labels[i],
-      day: started.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       started,
       money: MONEY_WORDS[r.state],
       amount,
@@ -148,14 +152,13 @@ export function ledgerData(rows: LedgerRow[]): AgDataSourcesDefinition {
           { id: "id", name: "Job ID", format: "textFormat", hide: true },
           { id: "job", name: "Job", format: "textFormat" },
           { id: "label", name: "Started at", format: "textFormat" },
-          { id: "day", name: "Day", format: "textFormat" },
-          { id: "started", name: "Started", format: "dateTimeFormat", formatOptions: { format: stamp } },
+          { id: "started", name: "Started", format: "dateTimeFormat", formatOptions: { format: startedAs } },
           { id: "money", name: "Money", format: "textFormat", context: { cell: "money" } },
           { id: "amount", name: "Amount", ...money },
           { id: "paidOut", name: "Paid", ...money },
           { id: "heldNow", name: "Held", ...money },
           { id: "returned", name: "Back to the client", ...money },
-          { id: "verdict", name: "Latest verdict", format: "textFormat", context: { cell: "verdict" } },
+          { id: "verdict", name: "Verdict", format: "textFormat", context: { cell: "verdict" } },
           ...VERDICT_MEASURES.map(([v, k]) => ({ id: k, ...count(VERDICT_WORDS[v]) })),
           { id: "secondsToPaid", name: "Paid in", format: "decimalFormat", createValueFormatter: () => inSeconds, blankValue: "–" },
           { id: "hold", name: "PayPal hold", format: "textFormat", context: { cell: "id" } },
@@ -203,39 +206,47 @@ const kpi = (text: string, value: { id: string; aggregation?: "sum" | "countd" }
   format: { ...title(text), style: { color, typography: { fontFamily: SERIF, fontSize: 40, fontWeight: "normal" as const, fontStyle: "normal" as const } }, crossFilter: "none" as const },
 });
 
-// Studio places widgets on a 24-column canvas; a phone gets one widget per row.
-const LAPTOP = {
-  "held-now": at(0, 0, 6, 6),
-  "paid-out": at(6, 0, 6, 6),
-  "median-secs": at(12, 0, 6, 6),
-  jobs: at(18, 0, 6, 6),
-  "money-by-job": at(0, 6, 9, 18),
-  "seconds-to-paid": at(9, 6, 6, 18),
-  verdicts: at(15, 6, 9, 18),
-  grid: at(0, 24, 17, 30),
-  proof: at(17, 24, 7, 30),
-};
-const PHONE = {
-  "held-now": at(0, 0, 12, 6),
-  "paid-out": at(12, 0, 12, 6),
-  "median-secs": at(0, 6, 12, 6),
-  jobs: at(12, 6, 12, 6),
-  grid: at(0, 12, 24, 26),
-  proof: at(0, 38, 24, 34),
-  "money-by-job": at(0, 72, 24, 18),
-  "seconds-to-paid": at(0, 90, 24, 16),
-  verdicts: at(0, 106, 24, 16),
-};
+// Studio places widgets on a 24-column canvas. The table is as tall as its jobs, up to ten of them, then scrolls.
+function places(jobs: number) {
+  const grid = Math.ceil((GRID_CHROME + Math.min(jobs, 10) * GRID_ROW) / ROW);
+  const laptop = {
+    "held-now": at(0, 0, 6, 6),
+    "paid-out": at(6, 0, 6, 6),
+    "median-secs": at(12, 0, 6, 6),
+    jobs: at(18, 0, 6, 6),
+    "money-by-job": at(0, 6, 9, 18),
+    "seconds-to-paid": at(9, 6, 7, 18),
+    verdicts: at(16, 6, 8, 18),
+    grid: at(0, 24, 24, grid),
+    proof: at(0, 24 + grid, 24, 20),
+  };
+  const phone: typeof laptop = {
+    "held-now": at(0, 0, 12, 6),
+    "paid-out": at(12, 0, 12, 6),
+    "median-secs": at(0, 6, 12, 6),
+    jobs: at(12, 6, 12, 6),
+    grid: at(0, 12, 24, grid),
+    proof: at(0, 12 + grid, 24, 40),
+    "money-by-job": at(0, 52 + grid, 24, 18),
+    "seconds-to-paid": at(0, 70 + grid, 24, 16),
+    verdicts: at(0, 86 + grid, 24, 14),
+  };
+  return { laptop, phone };
+}
 const tall = (layout: Record<string, AgWidgetLayoutState>) => Math.max(...Object.values(layout).map((l) => l.yTrack + l.ySpan)) * ROW + 24;
-export const LEDGER_HEIGHT = { laptop: tall(LAPTOP), phone: tall(PHONE) };
 
-// Below 720px of canvas, Studio asks for each widget's place; the widgets are matched by their laptop place.
-const idAt = new Map(Object.entries(LAPTOP).map(([id, l]) => [`${l.xTrack},${l.yTrack}`, id as keyof typeof PHONE]));
-export const ledgerBreakpoints: AgResponsiveLayoutBreakpoint[] = [
-  { maxWidth: 719, layout: (widgets) => widgets.map((w) => PHONE[idAt.get(`${w.layout.xTrack},${w.layout.yTrack}`)!] ?? w.layout) },
-];
+/** The ledger's report for this many jobs: its widgets, their places on a laptop and a phone, and the page's height on each. */
+export function ledgerLayout(jobs: number) {
+  const { laptop, phone } = places(jobs);
+  // Below 720px of canvas, Studio asks for each widget's place; the widgets are matched by their laptop place.
+  const idAt = new Map(Object.entries(laptop).map(([id, l]) => [`${l.xTrack},${l.yTrack}`, id as keyof typeof phone]));
+  const breakpoints: AgResponsiveLayoutBreakpoint[] = [
+    { maxWidth: 719, layout: (widgets) => widgets.map((w) => phone[idAt.get(`${w.layout.xTrack},${w.layout.yTrack}`)!] ?? w.layout) },
+  ];
+  return { report: ledgerReport(laptop), breakpoints, height: { laptop: tall(laptop), phone: tall(phone) } };
+}
 
-export function ledgerReport(): AgReportState {
+function ledgerReport(widgetLayout: Record<string, AgWidgetLayoutState>): AgReportState {
   return {
     selectedPageId: "ledger",
     pages: [
@@ -258,8 +269,8 @@ export function ledgerReport(): AgReportState {
           },
           verdicts: {
             type: "bar-chart-stacked",
-            dataMapping: { categoryKey: [{ id: "jobs.day" }], valueKey: VERDICT_MEASURES.map(([, k]) => ({ id: `${k}Jobs` })) },
-            format: { ...title("Latest verdict on each job", "Jobs by what the checker said last"), style: { theme: { common: { legend: { enabled: true, position: "right" } } } }, crossFilter: "highlight" },
+            dataMapping: { categoryKey: [{ id: "jobs.verdict" }], valueKey: VERDICT_MEASURES.map(([, k]) => ({ id: `${k}Jobs` })) },
+            format: { ...title("Latest verdict on each job", "Jobs by what the checker said last"), style: { theme: { common: { legend: { enabled: false } } } }, crossFilter: "highlight" },
           },
           grid: {
             type: "grid",
@@ -274,10 +285,8 @@ export function ledgerReport(): AgReportState {
                 { id: "jobs.hold" },
                 { id: "jobs.capture" },
                 { id: "jobs.payout" },
-                { id: "jobs.id" },
               ],
             },
-            sort: [{ field: { id: "jobs.started" }, direction: "desc" }],
             format: { ...title("Every job", "Click a row to see its proof"), style: { columnAutoSize: true }, crossFilter: "filter", triggerCrossFilter: true },
           },
           proof: {
@@ -286,7 +295,7 @@ export function ledgerReport(): AgReportState {
             format: { ...title("Proof trail"), crossFilter: "filter" },
           },
         },
-        widgetLayout: LAPTOP,
+        widgetLayout,
         layout: { minWidth: 300 },
       },
     ],
@@ -298,31 +307,21 @@ export function ledgerReport(): AgReportState {
 const STATE_BY_WORD = Object.fromEntries(Object.entries(MONEY_WORDS).map(([k, w]) => [w, k])) as Record<string, LedgerRow["state"]>;
 const VERDICT_BY_WORD = Object.fromEntries(Object.entries(VERDICT_WORDS).map(([k, w]) => [w, k])) as Record<string, LedgerRow["verdict"]>;
 
-const MONEY_TEXT: Record<LedgerRow["state"], [string, string]> = {
-  awaiting_hold: ["text-ink-3", "bg-ink-3"],
-  held: ["text-held", "bg-held-dot"],
-  paid: ["text-paid", "bg-paid-dot"],
-  part_paid: ["text-paid", "bg-paid-dot"],
-  cancelled: ["text-ink-3", "bg-ink-3"],
-};
-const VERDICT_TEXT: Record<LedgerRow["verdict"], [string, string]> = {
-  checking: ["text-ink-2", "bg-ink-3"],
-  passed: ["text-paid", "bg-paid-dot"],
-  failed: ["text-fail", "bg-fail"],
-  disagreed: ["text-ask", "bg-ask"],
-  none: ["text-ink-3", "bg-line"],
-};
+const MONEY_TEXT: Record<LedgerRow["state"], string> = { awaiting_hold: "text-ink-3", held: "text-held", paid: "text-paid", part_paid: "text-paid", cancelled: "text-ink-3" };
+const VERDICT_TEXT: Record<LedgerRow["verdict"], string> = { checking: "text-ink-2", passed: "text-paid", failed: "text-fail", disagreed: "text-ask", none: "text-ink-3" };
 
-function Dot({ word, tone }: { word: string; tone?: [string, string] }) {
-  if (!tone) return null;
-  return <span className={cx("text-[12px] font-semibold tracking-[0.08em] uppercase", tone[0])}>{word}</span>;
+// The table sizes each column to its values as plain 13px text, so a cell's words must not set wider than that: 12px with next to no tracking.
+function wordCell(tones: (word: string) => string | undefined) {
+  return (p: { value?: string }) => {
+    const tone = tones(p.value ?? "");
+    return <span className={tone ? `text-[12px] font-semibold tracking-[0.02em] uppercase ${tone}` : "text-[12.5px] text-ink-2"}>{p.value || "–"}</span>;
+  };
 }
-const MoneyCell = (p: CustomCellRendererProps) => <Dot word={p.value} tone={MONEY_TEXT[STATE_BY_WORD[p.value]]} />;
-const VerdictCell = (p: CustomCellRendererProps) => <Dot word={p.value} tone={VERDICT_TEXT[VERDICT_BY_WORD[p.value]]} />;
-function IdCell(p: CustomCellRendererProps) {
-  return <span className="font-mono text-[12.5px] text-ink-2">{p.value || "–"}</span>;
-}
-const CELLS: Record<string, (p: CustomCellRendererProps) => React.ReactNode> = { money: MoneyCell, verdict: VerdictCell, id: IdCell };
+const CELLS: Record<string, ReturnType<typeof wordCell>> = {
+  money: wordCell((w) => MONEY_TEXT[STATE_BY_WORD[w]]),
+  verdict: wordCell((w) => VERDICT_TEXT[VERDICT_BY_WORD[w]]),
+  id: wordCell(() => undefined),
+};
 
 /* ---------- the proof trail: the selected job's checks, quotes and PayPal IDs ---------- */
 
@@ -371,7 +370,9 @@ function ProofBody({ job, picked }: { job: Job; picked: boolean }) {
     { label: "Paid to the freelancer", id: m.payoutBatchId, note: m.payoutStatus && (m.payoutStatus === "SUCCESS" ? "sent" : ["PENDING", "PROCESSING"].includes(m.payoutStatus) ? "sending" : m.payoutStatus.toLowerCase()), done: !!m.payoutBatchId },
   ];
   return (
-    <div className="flex h-full flex-col overflow-auto px-2 pb-2 text-ink">
+    <div className="@container h-full overflow-auto px-2 pb-2 text-ink">
+     <div className="@3xl:grid @3xl:grid-cols-[320px_minmax(0,1fr)] @3xl:gap-x-12">
+     <div className="flex min-w-0 flex-col">
       <div className="font-mono text-[11px] tracking-[0.1em] text-ink-3 uppercase">{picked ? "The job you picked" : "The newest job. Click a row to pick another."}</div>
       <Link href={`/j/${job.id}`} className="mt-1.5 font-serif text-[19px] leading-snug font-medium hover:underline">
         {job.title}
@@ -397,15 +398,16 @@ function ProofBody({ job, picked }: { job: Job; picked: boolean }) {
           </li>
         ))}
       </ol>
-
-      <div className="mt-4 label">{last ? `The checks on delivery ${job.deliveries.length}` : "The checks"}</div>
-      <ul className="mt-1 font-mono text-[12.5px] leading-[1.45]">
+     </div>
+     <div className="min-w-0">
+      <div className="mt-4 label @3xl:mt-0">{last ? `The checks on delivery ${job.deliveries.length}` : "The checks"}</div>
+      <ul className="mt-1 font-mono text-[12.5px] leading-[1.45] @3xl:columns-2 @3xl:gap-x-10">
         {job.checks.map((c, i) => {
           const a = last?.first.find((x) => x.checkId === c.id);
           const b = last?.second?.find((x) => x.checkId === c.id);
           const [word, tone] = !a ? ["—", "text-ink-3"] : a && b && a.pass !== b.pass ? ["Split", "text-ask"] : a.pass ? ["Pass", "text-paid"] : ["Fail", "text-fail"];
           return (
-            <li key={c.id} className="grid grid-cols-[20px_minmax(0,1fr)_auto] gap-x-1.5 py-1">
+            <li key={c.id} className="grid break-inside-avoid grid-cols-[20px_minmax(0,1fr)_auto] gap-x-1.5 py-1">
               <span className="text-ink-3">{String(i + 1).padStart(2, "0")}</span>
               <span className="flex min-w-0 items-baseline gap-1.5">
                 <span className="min-w-0">{c.text}</span>
@@ -417,6 +419,8 @@ function ProofBody({ job, picked }: { job: Job; picked: boolean }) {
           );
         })}
       </ul>
+     </div>
+     </div>
     </div>
   );
 }

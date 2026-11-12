@@ -228,7 +228,7 @@ export function Receipt({ job, compact = false }: { job: Job; compact?: boolean 
         )}
         {kind !== "awaiting" && (
           <div
-            className="pointer-events-none absolute top-1 left-1/2 -translate-x-1/2 text-[26px] sm:-top-9 sm:left-[30%] sm:translate-x-0 sm:text-[30px]"
+            className="pointer-events-none absolute top-1 left-1/2 -translate-x-1/2 text-[26px] sm:-top-1 sm:left-[33%] sm:translate-x-0 sm:text-[30px]"
             style={printing ? ({ "--stamp-delay": `${job.checks.length * 110 + 150}ms` } as CSSProperties) : undefined}
           >
             <Stamp kind={kind} note={kind === "paid" && paidIn != null ? `in ${seconds(paidIn)}` : kind === "held" && m.heldAt ? when(m.heldAt) : undefined} />
