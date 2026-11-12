@@ -6,7 +6,7 @@ PayPal holds the client's money while a freelancer works. Claude checks the deli
 
 **Try it:** https://heldpayments.com
 
-It's for freelancers who sell work with a clear brief (writing, translation, design assets, small web jobs) and for the clients who hire them without knowing them. In the Freelancers Union's survey of 5,358 freelancers, one in two had trouble getting paid in a single year, and the longest wait averaged 98 days. A client who pays up front has the opposite risk: poor work, already paid for.
+It's for freelancers who sell work with a clear brief (writing, translation, design assets, small web jobs) and for the clients who hire them without knowing them. In the Freelancers Union's 2015 survey of 5,358 freelancers ([the report](https://www.onlabor.org/wp-content/uploads/2017/05/FU_NonpaymentReport_r3.pdf)), one in two had trouble getting paid in 2014, and the longest wait averaged 98 days. A client who pays up front has the opposite risk: poor work, already paid for.
 
 ## What it does
 
@@ -62,9 +62,9 @@ Four rules hold the verdict before money moves. They're enforced in code ([`src/
 
 Every call uses structured output, so a verdict is always one of pass or fail with its quote and reason.
 
-## Technological implementation
+## Technological Implementation
 
-The money moves through PayPal's Orders, Payments and Payouts APIs: an authorization holds the client's money, a capture takes all or part of it, a void cancels it, and a payout sends what was taken to the freelancer. Claude turns the brief into checks and checks every delivery twice, with code counting what can be counted and refusing any pass without a quote. The test set runs through the same code the live site uses, with one command.
+The money moves through PayPal's Orders, Payments and Payouts APIs: an authorization holds the client's money, a capture takes all or part of it, a void cancels it, and a payout sends what was taken to the freelancer. Claude turns the brief into checks and checks every delivery twice, with code counting what can be counted and refusing any pass without a quote. The test set of 40 cases runs through the same code the live site uses, with one command, and the faults its harder cases found are fixed with their tests in the repo.
 
 Built with React, TypeScript and Tailwind CSS, on one Cloudflare Worker (Hono for the API, D1 for the database), with the ledger in AG Studio.
 
@@ -72,13 +72,17 @@ Built with React, TypeScript and Tailwind CSS, on one Cloudflare Worker (Hono fo
 
 Both sides share one page per job, from the brief to the payment. Every state of the money (held, paid, part paid, cancelled) is on screen with PayPal's own IDs, and each check shows the words from the delivery behind its verdict. The ledger is an AG Studio dashboard in Held's own theme.
 
-## Potential impact
+## Potential Impact
 
-Freelancers who sell work with a clear brief wait weeks to be paid: in the Freelancers Union's survey, the longest wait averaged 98 days. With Held they're paid seconds after the work passes, and the client never pays for work that misses the brief. It runs on PayPal alone, so there's no marketplace taking a cut.
+Freelancers who sell work with a clear brief wait weeks to be paid: in the Freelancers Union's 2015 survey, the longest wait averaged 98 days. With Held they're paid seconds after the work passes, and the client never pays for work that misses the brief. It runs on PayPal alone, so there's no marketplace taking a cut.
 
-## Innovation
+## Innovation/Idea
 
 Escrow services and marketplaces hold money until someone says the job is done. In Held nobody marks the job complete: the brief both sides agreed decides, every verdict quotes its evidence, and the checker is measured against an answer key that anyone can run.
+
+## Presentation
+
+The video shows one real run on the live site, from the brief to the freelancer being paid, then the ledger and the test results. Everything in it can be repeated at https://heldpayments.com in under a minute.
 
 ## What's real and what's seeded
 
