@@ -1,18 +1,36 @@
-import { enableStudioDevValidations } from "ag-studio";
+import { AgStudioAiModule, AgStudioModuleRegistry, createAiHarness, enableStudioDevValidations, type AgAiHarnessSetup, type AgStudioApi } from "ag-studio";
 import { AgStudio, AgStudioProvider } from "ag-studio-react";
-import { useMemo, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Link } from "wouter";
+import { claudeAdapter } from "../agent";
 import { useLedger } from "../api";
 import { heldTheme, ledgerData, ledgerLayout, ledgerWidgets } from "../components/studio";
 import { Empty, Page, Spinner } from "../components/ui";
 
 if (import.meta.env.DEV) enableStudioDevValidations();
+AgStudioModuleRegistry.registerModules([AgStudioAiModule]);
+
+const AS_NEW = " Add a new widget for it at the bottom of the page and leave the other widgets as they are.";
+const QUESTIONS = [
+  { label: "Which jobs failed, and why?", prompt: "Which jobs failed their checks, and why?" + AS_NEW },
+  { label: "How fast were jobs paid?", prompt: "How many seconds did each paid job take from delivery to paid?" + AS_NEW },
+  { label: "Where is the money now?", prompt: "How much money is held, paid out and back with the client right now?" + AS_NEW },
+];
+
+// The ledger's agent: AG Studio's own agents, on Claude through Held's worker.
+const agent: AgAiHarnessSetup = ({ api }) => createAiHarness(api as AgStudioApi, { adapter: claudeAdapter, primary: "lead", promptStarters: QUESTIONS });
 
 export function Ledger() {
   const { data: rows, error, reload } = useLedger();
   const data = useMemo(() => (rows ? ledgerData(rows) : undefined), [rows]);
   const jobs = rows?.length ?? 0;
   const layout = useMemo(() => ledgerLayout(jobs), [jobs]);
+  const [asking, setAsking] = useState(false);
+  const studio = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (asking) studio.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    else studio.current?.querySelector(".ag-studio-layout")?.scrollTo({ top: 0 });
+  }, [asking]);
 
   return (
     <Page>
@@ -46,19 +64,32 @@ export function Ledger() {
           </Empty>
         ) : (
           <AgStudioProvider>
-            <div className="-mx-[14px] h-(--phone) md:h-(--laptop)" style={{ "--phone": `${layout.height.phone}px`, "--laptop": `${layout.height.laptop}px` } as CSSProperties}>
-              <AgStudio
-                key={jobs}
-                theme={heldTheme}
-                data={data}
-                initialState={layout.report}
-                widgets={ledgerWidgets}
-                context={{ rows }}
-                mode="view"
-                panels={{ view: { left: [], right: [] } }}
-                responsiveLayoutBreakpoints={layout.breakpoints}
-                style={{ height: "100%" }}
-              />
+            {/* While the chat is open the button and the dashboard together fill the screen under the top bar,
+                so the question box stays in view and the canvas scrolls inside. */}
+            <div ref={studio} className="scroll-mt-[76px]">
+              <div className="mb-3 hidden justify-end min-[720px]:flex">
+                <button className="btn btn-quiet" onClick={() => setAsking((a) => !a)}>
+                  {asking ? "Done asking" : "Ask about the ledger"}
+                </button>
+              </div>
+              <div
+                className={asking ? "-mx-[14px] h-[calc(100dvh-152px)]" : "-mx-[14px] h-(--phone) md:h-(--laptop)"}
+                style={{ "--phone": `${layout.height.phone}px`, "--laptop": `${layout.height.laptop}px` } as CSSProperties}
+              >
+                <AgStudio
+                  key={jobs}
+                  theme={heldTheme}
+                  data={data}
+                  initialState={layout.report}
+                  widgets={ledgerWidgets}
+                  context={{ rows }}
+                  mode={asking ? "edit" : "view"}
+                  panels={{ view: { left: [], right: [] }, edit: { left: [], right: ["ai"] } }}
+                  ai={agent}
+                  responsiveLayoutBreakpoints={layout.breakpoints}
+                  style={{ height: "100%" }}
+                />
+              </div>
             </div>
           </AgStudioProvider>
         )}

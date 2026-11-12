@@ -49,11 +49,12 @@ export async function updateJob(db: D1Database, id: string, fields: Partial<JobR
 export async function ledger(db: D1Database): Promise<LedgerRow[]> {
   const { results } = await db.prepare(`
     SELECT j.*, (SELECT outcome FROM deliveries d WHERE d.job_id = j.id ORDER BY d.at DESC LIMIT 1) AS last_outcome,
+      (SELECT missing_json FROM deliveries d WHERE d.job_id = j.id ORDER BY d.at DESC LIMIT 1) AS last_missing,
       (SELECT MIN(seconds_to_paid) FROM deliveries d WHERE d.job_id = j.id) AS secs
-    FROM jobs j WHERE j.money_state != 'awaiting_hold' OR j.seeded = 1 ORDER BY j.created_at DESC LIMIT 500`).all<JobRow & { last_outcome: Delivery["outcome"] | null; secs: number | null }>();
+    FROM jobs j WHERE j.money_state != 'awaiting_hold' OR j.seeded = 1 ORDER BY j.created_at DESC LIMIT 500`).all<JobRow & { last_outcome: Delivery["outcome"] | null; last_missing: string | null; secs: number | null }>();
   return results.map((r) => ({
     id: r.id, title: r.title, createdAt: r.created_at, seeded: !!r.seeded, state: r.money_state, price: r.amount, amount: r.captured_amount ?? r.amount,
-    verdict: r.last_outcome ?? "none", secondsToPaid: r.secs, authorizationId: opt(r.authorization_id), captureId: opt(r.capture_id), payoutBatchId: opt(r.payout_batch_id),
+    verdict: r.last_outcome ?? "none", missing: r.last_missing ? (JSON.parse(r.last_missing) as string[]) : [], secondsToPaid: r.secs, authorizationId: opt(r.authorization_id), captureId: opt(r.capture_id), payoutBatchId: opt(r.payout_batch_id),
   }));
 }
 

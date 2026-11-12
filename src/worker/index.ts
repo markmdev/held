@@ -8,6 +8,8 @@ import { measure, type Measured } from "./measure";
 import * as paypal from "./paypal";
 import { settle } from "./verdict";
 import { pdfText } from "./pdf";
+import type { AgLlmRequest } from "ag-studio";
+import { agentTurn } from "./agent";
 
 type Env = {
   DB: D1Database;
@@ -17,6 +19,7 @@ type Env = {
   PAYPAL_CLIENT_SECRET: string;
   PAYPAL_WEBHOOK_ID?: string;
   DAILY_CHECKS: string;
+  DAILY_AGENT_TURNS: string;
   SANDBOX_BUYER_EMAIL?: string;
   SANDBOX_BUYER_PASSWORD?: string;
 };
@@ -24,7 +27,7 @@ type C = Context<{ Bindings: Env }>;
 
 const app = new Hono<{ Bindings: Env }>().basePath("/api");
 
-const fail = (c: C, status: 400 | 404 | 409 | 429 | 502, error: string, code?: ApiError["code"]) => c.json<ApiError>({ error, code }, status);
+const fail = (c: C, status: 400 | 404 | 409 | 413 | 429 | 502, error: string, code?: ApiError["code"]) => c.json<ApiError>({ error, code }, status);
 const now = () => new Date().toISOString();
 const newId = (p: string) => `${p}_${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
 const perDay = (c: C) => Number(c.env.DAILY_CHECKS) || 40;
@@ -233,6 +236,21 @@ app.post("/jobs/:id/cancel", async (c) => {
 });
 
 // PayPal's own word on what happened, checked with PayPal before it's believed.
+// One turn of the ledger's agent. Its turns have their own daily allowance, so questions can't use up the checks.
+app.post("/agent", async (c) => {
+  // Anyone can post here, so a turn far bigger than Studio's own (about 60 kB) is refused before it reaches Claude.
+  const body = await c.req.text();
+  if (body.length > 200_000) return fail(c, 413, "That question is too long for the ledger's agent.", "bad_request");
+  let req: AgLlmRequest | null = null;
+  try {
+    req = JSON.parse(body) as AgLlmRequest;
+  } catch {}
+  if (!Array.isArray(req?.input)) return fail(c, 400, "Send AG Studio's turn.", "bad_request");
+  if (!(await takeDaily(c.env.DB, "agent", Number(c.env.DAILY_AGENT_TURNS) || 600)))
+    return fail(c, 429, "Today's questions about the ledger are used up. Come back tomorrow.", "daily_limit");
+  return c.json(await agentTurn(c.env.ANTHROPIC_API_KEY, req));
+});
+
 app.post("/paypal/webhook", async (c) => {
   const event = (await c.req.json().catch(() => null)) as { id?: string; event_type?: string; resource?: { id?: string; payout_batch_id?: string; transaction_status?: string; time_processed?: string } } | null;
   if (!event?.id || !event.event_type) return c.body(null, 400);

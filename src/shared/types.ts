@@ -61,6 +61,8 @@ export type LedgerRow = Pick<Job, "id" | "title" | "createdAt" | "seeded"> & {
   /** The held price, or what was taken from the hold once it's paid. */
   amount: string;
   verdict: DeliveryOutcome | "none";
+  /** What the latest delivery still lacks, one line each; empty once it passes. */
+  missing: string[];
   secondsToPaid: number | null;
   authorizationId?: string;
   captureId?: string;
