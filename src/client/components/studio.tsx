@@ -12,15 +12,16 @@ import { cx, money, MoneyPill, OutcomePill, seconds, Spinner, when } from "./ui"
 const ROW = 18;
 const v = (name: string) => `var(--color-${name})`;
 const line = (name: string) => ({ width: 1, color: v(name) });
-const FONT = "'IBM Plex Sans', ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif";
+const MONO = "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
+const SERIF = "Newsreader, Georgia, 'Times New Roman', serif";
 
 // Charts take the palette in the order of their measures, so every chart lists its measures in this order:
 // paid green, held amber, grey, failed red, disagree violet.
-const PALETTE = ["#22a35a", "#f0a020", "#b9b4aa", "#b42318", "#5a3fd1"];
+const PALETTE = ["#2a9d5c", "#d08a12", "#b9b4aa", "#b42318", "#5a3fd1"];
 
 export const heldTheme = studioTheme.withParams({
-  fontFamily: FONT,
-  fontSize: 14,
+  fontFamily: MONO,
+  fontSize: 13,
   textColor: v("ink"),
   foregroundColor: v("ink"),
   subtleTextColor: v("ink-3"),
@@ -40,38 +41,38 @@ export const heldTheme = studioTheme.withParams({
   studioCanvasBackgroundColor: v("paper"),
   studioCanvasPadding: 0,
   studioCanvasRowHeight: ROW,
-  studioCanvasFontFamily: FONT,
+  studioCanvasFontFamily: MONO,
 
   studioWidgetBackgroundColor: v("card"),
   studioWidgetBorder: line("line"),
-  studioWidgetBorderRadius: 18,
+  studioWidgetBorderRadius: 4,
   studioWidgetPadding: 14,
-  studioWidgetTitleFontFamily: FONT,
-  studioWidgetTitleFontSize: 15,
-  studioWidgetTitleFontWeight: 700,
+  studioWidgetTitleFontFamily: SERIF,
+  studioWidgetTitleFontSize: 18,
+  studioWidgetTitleFontWeight: 500,
   studioWidgetTitleTextColor: v("ink"),
-  studioWidgetSubtitleFontFamily: FONT,
-  studioWidgetSubtitleFontSize: 13,
+  studioWidgetSubtitleFontFamily: MONO,
+  studioWidgetSubtitleFontSize: 12,
   studioWidgetSubtitleTextColor: v("ink-3"),
-  studioWidgetCaptionFontFamily: FONT,
-  studioWidgetCaptionFontSize: 12.5,
+  studioWidgetCaptionFontFamily: MONO,
+  studioWidgetCaptionFontSize: 12,
   studioWidgetCaptionTextColor: v("ink-3"),
 
-  gridFontFamily: FONT,
-  gridFontSize: 14,
+  gridFontFamily: MONO,
+  gridFontSize: 13,
   gridCellTextColor: v("ink"),
   gridHeaderBackgroundColor: v("card"),
   gridHeaderTextColor: v("ink-3"),
-  gridHeaderFontWeight: 600,
-  gridHeaderFontSize: 12.5,
+  gridHeaderFontWeight: 500,
+  gridHeaderFontSize: 10.5,
   gridRowHeight: 44,
-  gridRowBorder: line("line-2"),
+  gridRowBorder: { ...line("line"), style: "dashed" },
   gridHeaderRowBorder: line("line"),
   gridRowHoverColor: v("paper"),
   gridWrapperBorder: false,
   gridCellHorizontalPadding: 14,
 
-  chartFontFamily: FONT,
+  chartFontFamily: MONO,
   chartTextColor: v("ink-2"),
   chartSubtleTextColor: v("ink-3"),
   chartAxisLineColor: v("line"),
@@ -199,7 +200,7 @@ const title = (text: string, subtitle?: string) => ({
 const kpi = (text: string, value: { id: string; aggregation?: "sum" | "countd" }, color: string) => ({
   type: "value" as const,
   dataMapping: { value: [value] },
-  format: { ...title(text), style: { color, typography: { fontFamily: FONT, fontSize: 34, fontWeight: "bold" as const, fontStyle: "normal" as const } }, crossFilter: "none" as const },
+  format: { ...title(text), style: { color, typography: { fontFamily: SERIF, fontSize: 40, fontWeight: "normal" as const, fontStyle: "normal" as const } }, crossFilter: "none" as const },
 });
 
 // Studio places widgets on a 24-column canvas; a phone gets one widget per row.
@@ -241,19 +242,19 @@ export function ledgerReport(): AgReportState {
       {
         id: "ledger",
         widgets: {
-          "held-now": kpi("Held now", { id: "heldTotal" }, "#b26a00"),
-          "paid-out": kpi("Paid out", { id: "paidTotal" }, "#12703c"),
-          "median-secs": kpi("Median time to paid", { id: "summary.medianSeconds", aggregation: "sum" }, "#16181d"),
-          jobs: kpi("Jobs", { id: "jobs.id", aggregation: "countd" }, "#16181d"),
+          "held-now": kpi("Held now", { id: "heldTotal" }, "#a8650a"),
+          "paid-out": kpi("Paid out", { id: "paidTotal" }, "#1f7a45"),
+          "median-secs": kpi("Median to paid", { id: "summary.medianSeconds", aggregation: "sum" }, "#17171a"),
+          jobs: kpi("Jobs", { id: "jobs.id", aggregation: "countd" }, "#17171a"),
           "money-by-job": {
             type: "bar-chart-stacked",
             dataMapping: { categoryKey: [{ id: "jobs.label" }], valueKey: [{ id: "paidTotal" }, { id: "heldTotal" }, { id: "returnedTotal" }] },
-            format: { ...title("Money held against paid", "Each job's money: paid, still held, or back with the client"), style: { theme: { common: { legend: { enabled: true } } } }, crossFilter: "highlight" },
+            format: { ...title("Money held against paid", "Each job: paid, held, or returned"), style: { theme: { common: { legend: { enabled: true } } } }, crossFilter: "highlight" },
           },
           "seconds-to-paid": {
             type: "column-chart-grouped",
             dataMapping: { categoryKey: [{ id: "paid.label" }], valueKey: [{ id: "paid.seconds", aggregation: "min" }] },
-            format: { ...title("Seconds from delivery to paid", "Each job paid after its delivery passed"), crossFilter: "highlight" },
+            format: { ...title("Seconds from delivery to paid", "Each job paid on a pass"), crossFilter: "highlight" },
           },
           verdicts: {
             type: "bar-chart-stacked",
@@ -314,12 +315,7 @@ const VERDICT_TEXT: Record<LedgerRow["verdict"], [string, string]> = {
 
 function Dot({ word, tone }: { word: string; tone?: [string, string] }) {
   if (!tone) return null;
-  return (
-    <span className={cx("inline-flex items-center gap-1.5 font-semibold", tone[0])}>
-      <span className={cx("h-2 w-2 rounded-full", tone[1])} />
-      {word}
-    </span>
-  );
+  return <span className={cx("text-[12px] font-semibold tracking-[0.08em] uppercase", tone[0])}>{word}</span>;
 }
 const MoneyCell = (p: CustomCellRendererProps) => <Dot word={p.value} tone={MONEY_TEXT[STATE_BY_WORD[p.value]]} />;
 const VerdictCell = (p: CustomCellRendererProps) => <Dot word={p.value} tone={VERDICT_TEXT[VERDICT_BY_WORD[p.value]]} />;
@@ -376,14 +372,14 @@ function ProofBody({ job, picked }: { job: Job; picked: boolean }) {
   ];
   return (
     <div className="flex h-full flex-col overflow-auto px-2 pb-2 text-ink">
-      <div className="text-[12.5px] text-ink-3">{picked ? "The job you picked" : "The newest job. Click a row to pick another."}</div>
-      <Link href={`/j/${job.id}`} className="mt-1 text-[16px] leading-snug font-bold hover:underline">
+      <div className="font-mono text-[11px] tracking-[0.1em] text-ink-3 uppercase">{picked ? "The job you picked" : "The newest job. Click a row to pick another."}</div>
+      <Link href={`/j/${job.id}`} className="mt-1.5 font-serif text-[19px] leading-snug font-medium hover:underline">
         {job.title}
       </Link>
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <MoneyPill state={m.state} className="!py-0.5" />
         {last && <OutcomePill outcome={last.outcome} className="!py-0.5" />}
-        {last?.secondsToPaid != null && <span className="text-[13px] font-semibold text-paid">Paid in {seconds(last.secondsToPaid)}</span>}
+        {last?.secondsToPaid != null && <span className="font-mono text-[12px] font-semibold text-paid">Paid in {seconds(last.secondsToPaid)}</span>}
       </div>
 
       <div className="mt-4 label">PayPal</div>
@@ -392,7 +388,7 @@ function ProofBody({ job, picked }: { job: Job; picked: boolean }) {
           <li key={s.label} className="flex items-start gap-2.5">
             <span className={cx("mt-1 h-2.5 w-2.5 shrink-0 rounded-full", s.done ? "bg-paid-dot" : "bg-line")} />
             <div className="min-w-0">
-              <div className={cx("text-[13.5px] font-semibold", !s.done && "text-ink-3")}>
+              <div className={cx("text-[13px] font-medium", !s.done && "text-ink-3")}>
                 {s.label}
                 {s.note && <span className="ml-1.5 font-normal text-ink-3">{s.note}</span>}
               </div>
@@ -403,29 +399,20 @@ function ProofBody({ job, picked }: { job: Job; picked: boolean }) {
       </ol>
 
       <div className="mt-4 label">{last ? `The checks on delivery ${job.deliveries.length}` : "The checks"}</div>
-      <ul className="mt-1.5 space-y-2.5">
-        {job.checks.map((c) => {
+      <ul className="mt-1 font-mono text-[12.5px] leading-[1.45]">
+        {job.checks.map((c, i) => {
           const a = last?.first.find((x) => x.checkId === c.id);
           const b = last?.second?.find((x) => x.checkId === c.id);
-          const ask = a && b && a.pass !== b.pass;
-          const tone = !a ? "wait" : ask ? "ask" : a.pass ? "pass" : "fail";
+          const [word, tone] = !a ? ["—", "text-ink-3"] : a && b && a.pass !== b.pass ? ["Split", "text-ask"] : a.pass ? ["Pass", "text-paid"] : ["Fail", "text-fail"];
           return (
-            <li key={c.id} className="flex gap-2.5">
-              <span
-                className={cx(
-                  "mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[11px] font-black",
-                  tone === "pass" && "bg-paid-dot text-white",
-                  tone === "fail" && "bg-fail text-white",
-                  tone === "ask" && "bg-ask text-white",
-                  tone === "wait" && "bg-line text-ink-3",
-                )}
-              >
-                {tone === "pass" ? "✓" : tone === "fail" ? "✕" : tone === "ask" ? "?" : "·"}
+            <li key={c.id} className="grid grid-cols-[20px_minmax(0,1fr)_auto] gap-x-1.5 py-1">
+              <span className="text-ink-3">{String(i + 1).padStart(2, "0")}</span>
+              <span className="flex min-w-0 items-baseline gap-1.5">
+                <span className="min-w-0">{c.text}</span>
+                <span className="leader" />
               </span>
-              <div className="min-w-0">
-                <div className="text-[13.5px] leading-snug font-semibold">{c.text}</div>
-                {a?.quote && <div className="mt-0.5 border-l-2 border-line pl-2 text-[12.5px] leading-snug text-ink-2">{a.quote}</div>}
-              </div>
+              <span className={cx("font-semibold tracking-[0.08em] uppercase", tone)}>{word}</span>
+              {a?.quote && a.quote !== "none found" && <span className="col-start-2 col-end-4 line-clamp-2 text-[11.5px] text-ink-2">“{a.quote.replace(/^[“"]|[”"]$/g, "")}”</span>}
             </li>
           );
         })}

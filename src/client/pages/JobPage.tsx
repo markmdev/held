@@ -1,8 +1,9 @@
 import { useCallback, useState } from "react";
 import { cancel, deliver, fileToBase64, HeldError, release, useConfig, useJob } from "../api";
-import { ActionPanel, CheckList, DeliveryCard, MoneyCard, ShareLink, type Busy, type DeliverInput } from "../components/job";
+import { ActionPanel, DeliveryCard, ShareLink, type Busy, type DeliverInput } from "../components/job";
+import { Receipt, Timeline } from "../components/receipt";
 import { PayPalHold } from "../components/PayPalHold";
-import { cx, Empty, Page, Spinner, when } from "../components/ui";
+import { cx, Empty, Page, seconds, Spinner } from "../components/ui";
 import { EXAMPLE, FINISHED, UNFINISHED } from "../../shared/example";
 import type { Delivery, Job } from "../../shared/types";
 
@@ -72,44 +73,43 @@ export function JobPage({ id }: { id: string }) {
   const shown = pending && !job.deliveries.some((d) => d.outcome === "checking") ? [...job.deliveries, pending] : job.deliveries;
   const view = { ...job, deliveries: shown };
   const deliveries = shown.map((d, i) => ({ d, n: i + 1 })).reverse();
+  const st = job.money.state;
+  const last = shown.at(-1);
 
   return (
     <Page>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="label">Job</div>
-          <div className="mt-0.5 truncate text-[17px] font-bold sm:text-[19px]">{job.title}</div>
-        </div>
-        <ShareLink id={job.id} />
-      </div>
-
-      <MoneyCard job={view} />
-
-      <div className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-5">
-          <div className={job.money.state === "awaiting_hold" ? "order-2" : "order-1"}>
-            <CheckList job={view} />
+      <div className="grid items-start gap-8 lg:grid-cols-[220px_minmax(0,640px)_320px] lg:justify-center lg:gap-10">
+        <aside className="order-3 lg:sticky lg:top-24 lg:order-1">
+          <div className="label mb-3">What happened</div>
+          <Timeline job={view} />
+          <div className="mt-7">
+            <ShareLink id={job.id} />
+            <p className="mt-2 text-[14px] leading-snug text-ink-3">One page for both sides. Send it to the freelancer.</p>
           </div>
+        </aside>
+
+        <div className={cx("min-w-0 lg:order-2", st === "awaiting_hold" ? "order-2" : "order-1")}>
+          <Receipt job={view} />
           {deliveries.length > 0 && (
-            <section className="order-3 flex min-w-0 flex-col gap-4">
-              <h2 className="text-[19px] font-bold">Deliveries</h2>
-              {deliveries.map(({ d, n }) => (
-                <DeliveryCard key={d.id} job={view} d={d} n={n} latest={n === shown.length} />
-              ))}
+            <section className="mt-10">
+              <div className="label mb-3">{deliveries.length === 1 ? "The delivery" : `Deliveries, newest first`}</div>
+              <div className="flex flex-col gap-3">
+                {deliveries.map(({ d, n }) => (
+                  <DeliveryCard key={d.id} job={view} d={d} n={n} latest={n === shown.length} />
+                ))}
+              </div>
             </section>
           )}
-          <section className="card order-4 p-5 sm:p-6">
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 className="text-[19px] font-bold">The brief</h2>
-              <span className="text-[13px] text-ink-3">written {when(job.createdAt)}</span>
-            </div>
-            <p className="mt-2 text-[15.5px] leading-relaxed whitespace-pre-wrap text-ink-2">{job.brief}</p>
-            <div className="mt-3 text-[13.5px] text-ink-3">
-              Pays <span className="font-semibold text-ink-2">{job.freelancerEmail}</span> through PayPal.
-            </div>
-          </section>
         </div>
-        <aside className={cx("lg:sticky lg:top-20", job.money.state === "awaiting_hold" ? "order-1" : "order-2")}>
+
+        <aside className={cx("lg:sticky lg:top-24 lg:order-3", st === "awaiting_hold" ? "order-1" : "order-2")}>
+          {st === "paid" && last?.secondsToPaid != null && (
+            <div className="mb-6">
+              <div className="label">Delivery to paid</div>
+              <div className="mt-1 font-serif text-[64px] leading-none font-medium tracking-[-0.03em] text-paid">{seconds(last.secondsToPaid)}</div>
+              <p className="mt-3 text-[16px] leading-relaxed text-ink-2">Every check passed, so PayPal took the held money and paid {job.freelancerEmail}.</p>
+            </div>
+          )}
           <ActionPanel
             job={view}
             hold={<PayPalHold job={job} onHeld={onHeld} />}

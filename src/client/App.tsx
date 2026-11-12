@@ -12,7 +12,7 @@ function LedgerPage() {
   return (
     <Suspense
       fallback={
-        <Page wide>
+        <Page>
           <div className="flex items-center gap-3 pt-10 text-[15px] text-ink-2">
             <Spinner /> Loading the ledger
           </div>

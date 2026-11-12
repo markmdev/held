@@ -25,7 +25,7 @@ function CopyLine({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between gap-2 py-1">
       <span className="text-[13px] text-ink-2">{label}</span>
       <button
-        className="flex min-w-0 items-center gap-2 rounded-md px-1.5 py-0.5 font-mono text-[13px] hover:bg-line-2"
+        className="flex min-w-0 items-center gap-2 rounded-[3px] px-1.5 py-0.5 font-mono text-[13px] hover:bg-line-2"
         onClick={() => {
           void navigator.clipboard?.writeText(value);
           setCopied(true);
@@ -33,7 +33,7 @@ function CopyLine({ label, value }: { label: string; value: string }) {
         }}
       >
         <span className="truncate">{value}</span>
-        <span className="font-sans text-[11px] text-ink-3">{copied ? "Copied" : "Copy"}</span>
+        <span className={copied ? "text-[10.5px] tracking-[0.12em] text-paid uppercase" : "text-[10.5px] tracking-[0.12em] text-ink-3 uppercase"}>{copied ? "Copied" : "Copy"}</span>
       </button>
     </div>
   );
@@ -66,7 +66,7 @@ export function PayPalHold({ job, onHeld }: { job: Job; onHeld: (j: Job) => void
   }, [config?.paypalClientId, job.id, onHeld]);
 
   if (config && !config.paypalClientId)
-    return <p className="rounded-xl bg-off-bg px-3.5 py-3 text-[14.5px] text-ink-2">PayPal isn't connected yet, so the hold can't be placed. Try again later.</p>;
+    return <p className="rounded-[3px] bg-off-bg px-3.5 py-3 text-[14.5px] text-ink-2">PayPal isn't connected yet, so the hold can't be placed. Try again later.</p>;
   return (
     <div>
       {!ready && !error && (
@@ -76,14 +76,14 @@ export function PayPalHold({ job, onHeld }: { job: Job; onHeld: (j: Job) => void
       )}
       <div ref={box} />
       {config?.sandboxBuyer && (
-        <div className="mt-4 rounded-xl border border-dashed border-line bg-paper px-4 py-3">
+        <div className="mt-4 rounded-[3px] border border-dashed border-line bg-paper px-4 py-3">
           <div className="label">Log in to PayPal with</div>
           <CopyLine label="Email" value={config.sandboxBuyer.email} />
           <CopyLine label="Password" value={config.sandboxBuyer.password} />
           <div className="mt-1 text-[12px] leading-relaxed text-ink-3">A test buyer in PayPal's sandbox. Its money isn't real.</div>
         </div>
       )}
-      {error && <p className="mt-3 rounded-xl bg-fail-bg px-3.5 py-3 text-[14px] text-fail">{error}</p>}
+      {error && <p className="mt-3 rounded-[3px] bg-fail-bg px-3.5 py-3 text-[14px] text-fail">{error}</p>}
     </div>
   );
 }

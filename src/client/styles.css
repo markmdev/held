@@ -3,35 +3,36 @@
 /* Held's look: paper and ink, one colour per state of the money. Amber is held, green is paid,
    red is a failed check, violet asks a person to decide, grey is cancelled. */
 @theme {
-  --font-sans: "IBM Plex Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-sans: "Newsreader", ui-serif, Georgia, serif;
+  --font-serif: "Newsreader", ui-serif, Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --font-serif: "IBM Plex Serif", ui-serif, Georgia, serif;
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 
-  --color-paper: #f7f5f0;
-  --color-card: #ffffff;
-  --color-ink: #16181d;
-  --color-ink-2: #4f5562;
-  --color-ink-3: #8a8f99;
-  --color-line: #e6e2d9;
-  --color-line-2: #efece5;
+  --color-desk: #e8e4db;
+  --color-paper: #e8e4db;
+  --color-card: #fffdf8;
+  --color-ink: #17171a;
+  --color-ink-2: #55535a;
+  --color-ink-3: #8a867f;
+  --color-line: #d8d2c4;
+  --color-line-2: #ebe6da;
 
-  --color-held: #b26a00;
-  --color-held-bg: #fff3d6;
-  --color-held-dot: #f0a020;
-  --color-paid: #12703c;
-  --color-paid-bg: #e3f5ea;
-  --color-paid-dot: #22a35a;
+  --color-held: #a8650a;
+  --color-held-bg: #fbecd2;
+  --color-held-dot: #d08a12;
+  --color-paid: #1f7a45;
+  --color-paid-bg: #e2f1e6;
+  --color-paid-dot: #2a9d5c;
   --color-fail: #b42318;
-  --color-fail-bg: #fdecea;
+  --color-fail-bg: #fbe9e6;
   --color-ask: #5a3fd1;
-  --color-ask-bg: #efebff;
-  --color-off: #5f6470;
-  --color-off-bg: #eeede9;
+  --color-ask-bg: #ece8fb;
+  --color-off: #6b6862;
+  --color-off-bg: #ece8df;
 
-  --radius-card: 18px;
-  --shadow-card: 0 1px 0 rgb(22 24 29 / 0.04), 0 8px 24px -12px rgb(22 24 29 / 0.12);
+  --radius-card: 4px;
+  --shadow-card: 0 1px 1px rgb(40 30 10 / 0.06), 0 12px 28px -18px rgb(40 30 10 / 0.25);
 }
 
 @layer base {
@@ -42,13 +43,16 @@
     font-variant-numeric: tabular-nums;
   }
   body {
-    font-family: var(--font-sans);
+    font-family: var(--font-serif);
     min-height: 100dvh;
+    font-size: 17px;
   }
   h1,
   h2,
   h3 {
-    letter-spacing: -0.02em;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    letter-spacing: -0.025em;
     text-wrap: balance;
   }
   ::selection {
@@ -78,11 +82,14 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    min-height: 44px;
-    padding: 0 1.1rem;
-    border-radius: 12px;
-    font-weight: 650;
-    font-size: 15px;
+    min-height: 46px;
+    padding: 0 1.2rem;
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     background: var(--color-ink);
     color: white;
     transition: transform 160ms var(--ease-out), background-color 150ms ease, opacity 150ms ease;
@@ -99,17 +106,17 @@
     cursor: not-allowed;
   }
   .btn-quiet {
-    background: var(--color-card);
+    background: transparent;
     color: var(--color-ink);
-    border: 1px solid var(--color-line);
+    border: 1.5px solid var(--color-ink);
   }
   .btn-quiet:hover {
     background: var(--color-line-2);
   }
   .btn-danger {
-    background: var(--color-card);
+    background: transparent;
     color: var(--color-fail);
-    border: 1px solid #f1c7c2;
+    border: 1.5px solid currentColor;
   }
   .btn-danger:hover {
     background: var(--color-fail-bg);
@@ -117,10 +124,10 @@
   .field {
     width: 100%;
     border: 1px solid var(--color-line);
-    border-radius: 12px;
-    background: white;
+    border-radius: 2px;
+    background: var(--color-card);
     padding: 0.7rem 0.85rem;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.5;
     outline: none;
   }
@@ -132,9 +139,10 @@
     box-shadow: 0 0 0 3px rgb(22 24 29 / 0.08);
   }
   .label {
-    font-size: 12px;
-    font-weight: 650;
-    letter-spacing: 0.06em;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--color-ink-3);
   }
@@ -155,24 +163,9 @@
   animation: held-shimmer 1.6s linear infinite;
 }
 
-/* A verdict lands: each row rises in, one after another. */
-@keyframes held-rise {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-}
-.rise {
-  animation: held-rise 280ms var(--ease-out) both;
-  animation-delay: calc(var(--i, 0) * 45ms);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .shimmer {
     animation: none;
-  }
-  .rise {
-    animation: held-fade 200ms ease both;
   }
   .btn:active:not(:disabled) {
     transform: none;
@@ -181,5 +174,101 @@
 @keyframes held-fade {
   from {
     opacity: 0;
+  }
+}
+
+/* The receipt: paper torn along the top and bottom edges. */
+.receipt {
+  --tear: 8px;
+  position: relative;
+  background: var(--color-card);
+  padding: calc(var(--tear) + 22px) 30px calc(var(--tear) + 22px);
+  filter: drop-shadow(0 16px 26px rgb(40 30 10 / 0.14)) drop-shadow(0 2px 2px rgb(40 30 10 / 0.07));
+  mask:
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% 100% / calc(2 * var(--tear)) var(--tear) repeat-x,
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 50% 0 / calc(2 * var(--tear)) var(--tear) repeat-x,
+    linear-gradient(#000 0 0) 0 var(--tear) / 100% calc(100% - 2 * var(--tear)) no-repeat;
+}
+@media (max-width: 639px) {
+  .receipt {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}
+.rule {
+  border: 0;
+  border-top: 1.5px dashed var(--color-line);
+  margin: 18px 0;
+}
+.leader {
+  flex: 1;
+  min-width: 14px;
+  height: 3px;
+  align-self: baseline;
+  background: radial-gradient(circle, var(--color-ink-3) 0.9px, transparent 1.1px) left center / 6px 3px repeat-x;
+  opacity: 0.7;
+}
+
+/* A rubber stamp: double border, a little rotated, ink sitting into the paper. */
+.stamp {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  padding: 0.3em 0.55em 0.3em 0.75em;
+  border: 3px solid currentColor;
+  border-radius: 6px;
+  outline: 1.5px solid currentColor;
+  outline-offset: 3px;
+  transform: rotate(-8deg);
+  mix-blend-mode: multiply;
+  opacity: 0.9;
+}
+.stamp small {
+  display: block;
+  font-size: 0.34em;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  margin-top: 0.15em;
+}
+@keyframes held-stamp {
+  0% {
+    opacity: 0;
+    transform: rotate(-8deg) scale(1.35);
+  }
+  60% {
+    opacity: 0.95;
+    transform: rotate(-8deg) scale(0.97);
+  }
+  100% {
+    opacity: 0.9;
+    transform: rotate(-8deg) scale(1);
+  }
+}
+.stamp-in {
+  animation: held-stamp 320ms var(--ease-out) both;
+  animation-delay: var(--stamp-delay, 0ms);
+}
+/* A receipt line printing. */
+@keyframes held-print {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+.print {
+  animation: held-print 260ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 110ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .stamp-in,
+  .print {
+    animation: held-fade 200ms ease both;
   }
 }

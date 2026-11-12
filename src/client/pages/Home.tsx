@@ -1,42 +1,65 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { useJob, useLedger, useStats } from "../api";
+import { Receipt } from "../components/receipt";
+import { Page, seconds } from "../components/ui";
 import type { Job } from "../../shared/types";
-import { Mark, money, MoneyPill, Page, seconds } from "../components/ui";
 
-const STEPS = [
-  { n: 1, title: "Agree the checks", text: "The client writes the brief in plain words. The AI turns it into a short list of checks both sides see before any money moves." },
-  { n: 2, title: "PayPal holds the money", text: "The client approves a hold in PayPal. The money is set aside, not taken, and nobody can spend it." },
-  { n: 3, title: "The work is checked", text: "The freelancer delivers. Each check passes or fails with a quote from the work. Counts are measured by code, not guessed." },
-  { n: 4, title: "Paid in seconds", text: "When two separate checks agree that every item passes, PayPal takes the held money and pays the freelancer." },
+type Phase = "held" | "checking" | "paid";
+
+/** A real paid job, played back from the moment its money was held to the moment it was paid. */
+function phaseOf(job: Job, phase: Phase, startedAt: string): Job {
+  const last = job.deliveries.at(-1);
+  const m = job.money;
+  if (phase === "paid" || !last) return job;
+  const held = { ...m, state: "held" as const, capturedAmount: undefined, captureId: undefined, payoutBatchId: undefined, payoutStatus: undefined, payoutDoneAt: undefined, paidAt: undefined };
+  if (phase === "held") return { ...job, money: held, deliveries: [] };
+  return { ...job, money: held, deliveries: [{ ...last, outcome: "checking", at: startedAt }] };
+}
+
+const STEPS: [Phase, number][] = [
+  ["checking", 1200],
+  ["paid", 3400],
 ];
 
-/** A real finished job, shown small: what a judge gets to in two minutes. */
-function Proof({ job }: { job: Job }) {
-  const last = job.deliveries.at(-1);
+function Replay({ job }: { job: Job }) {
+  const still = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const [run, setRun] = useState(0);
+  const [phase, setPhase] = useState<Phase>(still ? "paid" : "held");
+  const startedAt = useMemo(() => new Date(Date.now() + 1200).toISOString(), [run]);
+  useEffect(() => {
+    if (still) return;
+    setPhase("held");
+    const timers = STEPS.map(([p, ms]) => setTimeout(() => setPhase(p), ms));
+    return () => timers.forEach(clearTimeout);
+  }, [run, still]);
   return (
-    <div className="card relative overflow-hidden p-5 sm:p-6">
-      <div className="flex items-center justify-between gap-2">
-        <MoneyPill state={job.money.state} />
-        <span className="font-mono text-[12px] text-ink-3">{job.money.captureId}</span>
+    <div>
+      <div className="lg:rotate-[1.2deg]">
+        <Receipt job={phaseOf(job, phase, startedAt)} compact />
       </div>
-      <div className="mt-3 text-[15px] font-bold">{job.title}</div>
-      <div className="mt-1 text-[34px] leading-none font-[750] tracking-[-0.03em]">{money(job.money.capturedAmount ?? job.money.amount)}</div>
-      {last?.secondsToPaid != null && <div className="mt-2 text-[14px] font-semibold text-paid">Paid {seconds(last.secondsToPaid)} after the work was delivered</div>}
-      <ul className="mt-4 space-y-2 border-t border-line-2 pt-4">
-        {job.checks.map((c) => (
-          <li key={c.id} className="flex items-center gap-2.5 text-[14px]">
-            <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-paid-dot text-[11px] font-black text-white">✓</span>
-            <span className="min-w-0 truncate">{c.text}</span>
-          </li>
-        ))}
-      </ul>
+      <div className="mt-4 flex items-baseline justify-between gap-4 font-mono text-[11px] tracking-[0.1em] text-ink-3 uppercase">
+        <span>A real job on Held, from held to paid</span>
+        <button onClick={() => setRun((r) => r + 1)} className="shrink-0 hover:text-ink" disabled={phase !== "paid"}>
+          Play again
+        </button>
+      </div>
     </div>
   );
 }
 
-function ProofOf({ id }: { id: string }) {
+function ReplayOf({ id }: { id: string }) {
   const { data } = useJob(id);
-  return data ? <Proof job={data} /> : null;
+  return data ? <Replay job={data} /> : <div className="receipt h-[640px]" aria-hidden />;
+}
+
+function Fact({ value, label, href }: { value: string; label: string; href: string }) {
+  return (
+    <Link href={href} className="group block">
+      <div className="font-serif text-[34px] leading-none font-medium tracking-[-0.02em] group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">{value}</div>
+      <div className="mt-2 font-mono text-[11px] tracking-[0.12em] text-ink-2 uppercase">{label}</div>
+    </Link>
+  );
 }
 
 export function Home() {
@@ -45,70 +68,33 @@ export function Home() {
   const proofId = rows?.find((r) => r.state === "paid" && r.verdict === "passed")?.id;
   return (
     <Page>
-      <section className="grid items-center gap-10 pt-4 pb-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:pt-10">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-[13px] font-semibold text-ink-2 shadow-[0_0_0_1px_var(--color-line)]">
-            <Mark size={16} /> For freelancers and the clients who hire them
-          </div>
-          <h1 className="mt-5 text-[44px] leading-[1.02] font-bold tracking-[-0.035em] sm:text-[64px]">Paid the minute the work passes.</h1>
-          <p className="mt-5 max-w-xl text-[18px] leading-relaxed text-ink-2">
-            PayPal holds the client's money while the freelancer works. An AI check reads the delivery against the brief both sides agreed and quotes the work for every
-            item. When it all passes, the freelancer is paid in seconds. No invoice, no chasing.
+      <section className="grid items-start gap-12 lg:-mt-4 lg:grid-cols-[minmax(0,1fr)_490px] lg:gap-[72px]">
+        <div className="lg:pt-10">
+          <div className="font-mono text-[12px] tracking-[0.16em] text-ink-2 uppercase">For freelancers and the clients who hire them</div>
+          <h1 className="mt-5 text-[50px] leading-[0.98] tracking-[-0.035em] sm:text-[84px]">
+            Paid the minute the work <em className="text-paid">passes.</em>
+          </h1>
+          <p className="mt-6 max-w-xl text-[19px] leading-[1.55] text-ink-2 sm:text-[21px]">
+            PayPal holds the client's money. The work is checked against the brief, line by line, with a quote for every line. When every line passes, the freelancer is
+            paid.
           </p>
-          <div className="mt-7 flex flex-wrap items-center gap-3">
-            <Link href="/new?example=1" className="btn h-12 px-5 text-[16px]">
-              Try a sample job
+          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-7">
+            <Link href="/new?example=1" className="btn h-[52px] px-6">
+              Try a sample job →
             </Link>
-            <Link href="/new" className="btn btn-quiet h-12 px-5 text-[16px]">
+            <Link href="/new" className="self-center border-b-[1.5px] border-ink pb-0.5 font-mono text-[13px] tracking-[0.08em] uppercase sm:self-auto">
               Write your own brief
             </Link>
           </div>
-          <p className="mt-3 text-[13.5px] text-ink-3">Takes about two minutes. Payments run in PayPal's sandbox, and the test buyer's login is shown when you need it.</p>
+          <p className="mt-4 max-w-xl text-[15px] text-ink-3">About two minutes. Payments run in PayPal's sandbox, and the test buyer's login is shown when you need it.</p>
+          <div className="mt-10 flex flex-wrap gap-x-9 gap-y-5 border-t-[1.5px] border-dashed border-line pt-6">
+            <Fact href="/ledger" value={stats ? String(stats.jobsPaid) : "–"} label="Jobs paid" />
+            <Fact href="/ledger" value={seconds(stats?.medianSecondsToPaid)} label="Median, delivery to paid" />
+            <Fact href="/results" value={stats?.benchTotal ? `${stats.benchRight} of ${stats.benchTotal}` : "–"} label="Test verdicts right" />
+          </div>
         </div>
-        {proofId && <ProofOf id={proofId} />}
-      </section>
-
-      <section className="grid gap-3 sm:grid-cols-3">
-        <Link href="/ledger" className="block">
-          <StatBox value={stats ? String(stats.jobsPaid) : "–"} label="Jobs paid on Held" note="Every one in the ledger, with PayPal's IDs" />
-        </Link>
-        <Link href="/ledger" className="block">
-          <StatBox value={seconds(stats?.medianSecondsToPaid)} label="Median from delivery to paid" note="Measured on the live site" />
-        </Link>
-        <Link href="/results" className="block">
-          <StatBox
-            value={stats?.benchTotal ? `${stats.benchRight} of ${stats.benchTotal}` : "–"}
-            label="Verdicts right on the test set"
-            note="Every miss is listed"
-          />
-        </Link>
-      </section>
-
-      <section className="mt-14">
-        <h2 className="text-[26px] font-[750] sm:text-[30px]">How it works</h2>
-        <ol className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((s) => (
-            <li key={s.n} className="card p-5">
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-ink text-[14px] font-bold text-white">{s.n}</div>
-              <div className="mt-3 text-[16.5px] font-bold">{s.title}</div>
-              <p className="mt-1.5 text-[14.5px] leading-relaxed text-ink-2">{s.text}</p>
-            </li>
-          ))}
-        </ol>
-        <p className="mt-5 max-w-3xl text-[15px] leading-relaxed text-ink-2">
-          The client can always release the money anyway, release part of it, or cancel the hold. If the two checks disagree, nothing moves until the client decides.
-        </p>
+        {proofId && <ReplayOf id={proofId} />}
       </section>
     </Page>
-  );
-}
-
-function StatBox({ value, label, note }: { value: string; label: string; note: string }) {
-  return (
-    <div className="card h-full px-5 py-4 transition hover:-translate-y-0.5">
-      <div className="text-[34px] leading-tight font-[750] tracking-[-0.03em]">{value}</div>
-      <div className="mt-1 text-[14.5px] font-semibold">{label}</div>
-      <div className="mt-0.5 text-[12.5px] text-ink-3">{note}</div>
-    </div>
   );
 }

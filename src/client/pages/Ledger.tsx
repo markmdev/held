@@ -14,14 +14,15 @@ export function Ledger() {
   const initialState = useMemo(ledgerReport, []);
 
   return (
-    <Page wide>
+    <Page>
       <div className="max-w-3xl">
-        <h1 className="text-[34px] leading-tight font-[750] sm:text-[42px]">Ledger</h1>
-        <p className="mt-2 text-[17px] leading-relaxed text-ink-2">
+        <div className="font-mono text-[12px] tracking-[0.16em] text-ink-2 uppercase">Ledger</div>
+        <h1 className="mt-3 text-[40px] leading-[1.02] tracking-[-0.03em] sm:text-[56px]">Where's the money?</h1>
+        <p className="mt-4 text-[18px] leading-[1.55] text-ink-2">
           Every job on Held: what PayPal holds, what it has paid, how fast, and what the checker said. Each row carries PayPal's own IDs.
         </p>
       </div>
-      <div className="mt-7">
+      <div className="mt-9">
         {error && !rows ? (
           <Empty title="The ledger couldn't be loaded">
             {error}
@@ -44,7 +45,7 @@ export function Ledger() {
           </Empty>
         ) : (
           <AgStudioProvider>
-            <div className="h-(--phone) md:h-(--laptop)" style={{ "--phone": `${LEDGER_HEIGHT.phone}px`, "--laptop": `${LEDGER_HEIGHT.laptop}px` } as CSSProperties}>
+            <div className="-mx-[14px] h-(--phone) md:h-(--laptop)" style={{ "--phone": `${LEDGER_HEIGHT.phone}px`, "--laptop": `${LEDGER_HEIGHT.laptop}px` } as CSSProperties}>
               <AgStudio
                 theme={heldTheme}
                 data={data}
