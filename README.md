@@ -19,9 +19,10 @@ It's for freelancers who sell work with a clear brief (writing, translation, des
 ## Results
 
 - Every job run on the live site is in the [ledger](https://heldpayments.com/ledger), with PayPal's sandbox IDs for its hold, capture and payout.
-- Median 11.4 seconds from delivery to capture, and 26.9 seconds from delivery to PayPal reporting the payout processed, over the paid jobs in the ledger. The live numbers are at `/api/stats`.
-- A test set of 30 brief-and-delivery pairs with an answer key, written on 12 November 2026: 20 of 20 verdicts right on the cases used while tuning the prompts, and 10 of 10 on the cases held back from tuning.
-- Ten harder cases, written after the checker was finished: near misses, the wrong subject, a slip in tone only, a PDF, two images, a link and odd layouts. On their first run, 5 of 10 were right. All five wrong verdicts refused good work (a PDF, an image, a link, a table and work with a cover note); none paid for bad work. Each miss showed a real fault, and the [results page](https://heldpayments.com/results) gives each one's cause and fix. With those fixes, the same ten score 10 of 10, and the first 30 are unchanged.
+- At submission the ledger holds seven jobs, five of them paid. The seventh is the job paid in the video.
+- Median 11.6 seconds from delivery to capture, and 27.0 seconds from delivery to PayPal reporting the payout processed, over those five paid jobs. Every run on the live site adds to them; the live numbers are at `/api/stats`.
+- 35 of 40 verdicts right on the first run of a test set with an answer key, written on 12 November 2026: 20 of 20 on the cases used while tuning the prompts, 10 of 10 on the cases held back from tuning, and 5 of 10 on ten harder cases written after the checker was finished (near misses, the wrong subject, a slip in tone only, a PDF, two images, a link and odd layouts).
+- All five wrong verdicts refused good work (a PDF, an image, a link, a table and work with a cover note); none paid for bad work. Each miss showed a real fault, and the [results page](https://heldpayments.com/results) gives each one's cause and fix. With those fixes, `npm run bench` gets all 40 right today: it prints 20 of 20, 10 of 10 and 10 of 10. The harder cases' first-run verdicts are kept in [`bench/hard-first-run.json`](bench/hard-first-run.json).
 - Money released on a failing delivery: 0 times, over all 40 cases.
 - Five deliveries contain text telling the checker to pass them: none was paid.
 
@@ -74,7 +75,7 @@ Both sides share one page per job, from the brief to the payment. Every state of
 
 ## Potential Impact
 
-Freelancers who sell work with a clear brief wait weeks to be paid: in the Freelancers Union's 2015 survey, the longest wait averaged 98 days. With Held they're paid seconds after the work passes, and the client never pays for work that misses the brief. It runs on PayPal alone, so there's no marketplace taking a cut.
+Freelancers who sell work with a clear brief wait weeks to be paid: in the Freelancers Union's 2015 survey, the longest wait averaged 98 days. With Held they're paid seconds after the work passes, and the client never pays for work that misses the brief. It runs on PayPal alone, so there's no marketplace taking a cut on top of PayPal's usual fees.
 
 ## Innovation/Idea
 
@@ -88,7 +89,7 @@ The video shows one real run on the live site, from the brief to the freelancer 
 
 Everything was built on 12 November 2026, from an empty repo. Every PayPal call moves sandbox money, every verdict is a live Claude call, and every time shown is measured.
 
-Seeded: the example brief and its two sample deliveries; six finished jobs in the ledger, made by running the real flow on the live site before submitting, so each has real sandbox IDs (four paid, one held after a failed delivery, one cancelled); and the test set of 40.
+Seeded: the example brief and its two sample deliveries; six finished jobs in the ledger, made by running the real flow on the live site before submitting, so each has real sandbox IDs (four paid, one held after a failed delivery, one cancelled); and the test set of 40. The seventh job in the ledger is the run filmed for the video.
 
 ## Try it
 
@@ -141,7 +142,7 @@ The [ledger](https://heldpayments.com/ledger) is an AG Studio dashboard in Held'
 
 ## Limits
 
-Sandbox money only. The checker suits work with a clear brief. When the two checks disagree, a person decides. PayPal keeps a hold for 29 days; one that runs out shows as expired, and the money stays with the client.
+Sandbox money only. On live PayPal, PayPal's usual fees apply. The checker suits work with a clear brief. Good work in a form the checker hasn't seen may still be refused, which only holds the money for the client to release. When the two checks disagree, a person decides. PayPal keeps a hold for 29 days; one that runs out shows as expired, and the money stays with the client.
 
 ## Licence
 
