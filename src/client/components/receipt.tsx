@@ -93,10 +93,10 @@ export function Line({ n, check, d, print, i, compact = false }: { n: number; ch
   const b = d?.second?.find((v) => v.checkId === check.id);
   const v = VERDICT[st];
   return (
-    <li className={cx("grid grid-cols-[22px_minmax(0,1fr)_auto] gap-x-2", compact ? "py-[4px]" : "py-[6px]", print && "print")} style={{ "--i": i } as CSSProperties}>
+    <li className={cx("grid grid-cols-[22px_minmax(0,1fr)_auto] gap-x-2", compact ? "py-[3px]" : "py-[6px]", print && "print")} style={{ "--i": i } as CSSProperties}>
       <span className="text-ink-3">{String(n).padStart(2, "0")}</span>
       <span className="flex min-w-0 items-baseline gap-1.5">
-        <span className="min-w-0">{check.text}</span>
+        <span className={cx("min-w-0", compact && "truncate")}>{check.text}</span>
         <span className="leader" />
       </span>
       <span className={cx("font-semibold tracking-[0.08em] uppercase", v.cls, st === "checking" && "animate-pulse")}>{v.word}</span>
@@ -140,7 +140,7 @@ export function Receipt({ job, compact = false }: { job: Job; compact?: boolean 
   const printing = !!last && !checking;
 
   return (
-    <div className={cx("receipt font-mono leading-[1.5] text-ink", compact ? "text-[12.5px] [--tear:7px] [&_.rule]:my-3" : "text-[13px]")}>
+    <div className={cx("receipt font-mono leading-[1.5] text-ink", compact ? "text-[12.5px] [--tear:7px] [&_.rule]:my-2.5" : "text-[13px]")}>
       <div className="text-center">
         <div className="flex items-center justify-center gap-2 font-serif text-[24px] font-semibold tracking-[-0.03em]">
           <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden>
@@ -183,7 +183,7 @@ export function Receipt({ job, compact = false }: { job: Job; compact?: boolean 
         <div className="relative my-2 overflow-hidden rounded-[3px] bg-held-bg px-3 py-2 text-held">
           <div className="shimmer pointer-events-none absolute inset-0" aria-hidden />
           <div className="relative flex justify-between gap-3">
-            <span>Checking the work. If every line passes, a second check reads it again, then PayPal pays.</span>
+            <span>Claude is checking the work. If every line passes, a second check reads it again, separately, then PayPal pays.</span>
             <Elapsed since={last!.at} />
           </div>
         </div>
@@ -194,6 +194,13 @@ export function Receipt({ job, compact = false }: { job: Job; compact?: boolean 
           <Line key={`${c.id}-${last?.id ?? "none"}-${last?.outcome ?? ""}`} n={i + 1} i={i} check={c} d={last} print={printing} compact={compact} />
         ))}
       </ul>
+      {last?.second && !checking && (
+        <div className={cx("mt-1.5 flex items-baseline gap-1.5 border-t border-dashed border-line pt-2 pl-[30px]", printing && "print")} style={{ "--i": job.checks.length } as CSSProperties}>
+          <span>Second check, run separately</span>
+          <span className="leader" />
+          <span className={cx("font-semibold tracking-[0.08em] uppercase", last.outcome === "passed" ? "text-paid" : "text-ask")}>{last.outcome === "passed" ? "Agrees" : "Disagrees"}</span>
+        </div>
+      )}
       {last?.outcome === "failed" && last.missing.length > 0 && (
         <div className="mt-2 border-l-2 border-fail pl-3 text-[12.5px]">
           <div className="label mb-1 text-fail">Still missing</div>
@@ -205,7 +212,7 @@ export function Receipt({ job, compact = false }: { job: Job; compact?: boolean 
         </div>
       )}
       <hr className="rule" />
-      <div className="label mb-1">PayPal</div>
+      {!compact && <div className="label mb-1">PayPal</div>}
       {!compact && <IdLine label="Order" value={m.orderId} />}
       <IdLine label="Hold" value={m.authorizationId} />
       <IdLine label="Capture" value={m.captureId} />
@@ -222,7 +229,7 @@ export function Receipt({ job, compact = false }: { job: Job; compact?: boolean 
             <span>{money(m.amount)}</span>
           </div>
         )}
-        {paidIn != null && (
+        {paidIn != null && !compact && (
           <div className="flex justify-between text-ink-2">
             <span>Delivery to paid</span>
             <span>{seconds(paidIn)}</span>
@@ -231,7 +238,7 @@ export function Receipt({ job, compact = false }: { job: Job; compact?: boolean 
         {kind !== "awaiting" && (
           <div
             className="pointer-events-none absolute top-1 left-1/2 -translate-x-1/2 text-[26px] sm:-top-1 sm:left-[33%] sm:translate-x-0 sm:text-[30px]"
-            style={printing ? ({ "--stamp-delay": `${job.checks.length * 110 + 150}ms` } as CSSProperties) : undefined}
+            style={printing ? ({ "--stamp-delay": `${(job.checks.length + 1) * 110 + 150}ms` } as CSSProperties) : undefined}
           >
             <Stamp kind={kind} note={kind === "paid" && paidIn != null ? `in ${seconds(paidIn)}` : kind === "held" && m.heldAt ? when(m.heldAt) : undefined} />
           </div>
@@ -256,7 +263,7 @@ export function Timeline({ job }: { job: Job }) {
   const m = job.money;
   const items: { at?: string; text: ReactNode; tone: string }[] = [{ at: job.createdAt, text: "Checks agreed", tone: "bg-ink" }];
   if (m.heldAt) items.push({ at: m.heldAt, text: <>{money(m.amount)} held by PayPal</>, tone: "bg-held-dot" });
-  job.deliveries.forEach((d, i) =>
+  job.deliveries.forEach((d, i) => {
     items.push({
       at: d.at,
       text: (
@@ -265,8 +272,9 @@ export function Timeline({ job }: { job: Job }) {
         </>
       ),
       tone: d.outcome === "passed" ? "bg-paid-dot" : d.outcome === "failed" ? "bg-fail" : d.outcome === "disagreed" ? "bg-ask" : "bg-held-dot",
-    }),
-  );
+    });
+    if (d.outcome === "passed" && d.second) items.push({ text: "Second check, run separately, agrees", tone: "bg-paid-dot" });
+  });
   if (m.paidAt) items.push({ at: m.paidAt, text: m.state === "part_paid" ? <>{money(m.capturedAmount)} released</> : <>{money(m.capturedAmount ?? m.amount)} paid to the freelancer</>, tone: "bg-paid-dot" });
   if (m.cancelledAt) items.push({ at: m.cancelledAt, text: m.expired ? "Hold ran out at PayPal" : "Hold cancelled", tone: "bg-ink-3" });
   return (
@@ -275,7 +283,7 @@ export function Timeline({ job }: { job: Job }) {
         <li key={i} className="relative pb-4 pl-4 last:pb-0">
           <span className={cx("absolute top-[6px] -left-[5px] h-2 w-2 rounded-full", it.tone)} />
           <div className="text-ink">{it.text}</div>
-          <div className="text-ink-3">{it.at ? happenedAt(it.at, job.createdAt) : ""}</div>
+          {it.at && <div className="text-ink-3">{happenedAt(it.at, job.createdAt)}</div>}
         </li>
       ))}
     </ol>

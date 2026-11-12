@@ -75,8 +75,8 @@ export function Home() {
             Paid the minute the work <em className="text-paid">passes.</em>
           </h1>
           <p className="mt-6 max-w-xl text-[19px] leading-[1.55] text-ink-2 sm:text-[21px]">
-            PayPal holds the client's money. The work is checked against the brief, line by line, with a quote for every line. When every line passes, the freelancer is
-            paid.
+            PayPal holds the client's money. Claude checks the work against the brief, line by line, with a quote for every line. When every line passes and a second,
+            separate check agrees, the freelancer is paid.
           </p>
           <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-7">
             <Link href="/new?example=1" className="btn h-[52px] px-6">

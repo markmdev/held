@@ -87,7 +87,7 @@ export function NewJob() {
           <div className="font-mono text-[12px] tracking-[0.16em] text-ink-2 uppercase">New job</div>
           <h1 className="mt-3 text-[40px] leading-[1.02] tracking-[-0.03em] sm:text-[56px]">What should be delivered?</h1>
           <p className="mt-4 mb-9 max-w-xl text-[18px] leading-[1.55] text-ink-2">
-            Write it in plain words. Held turns it into checks that both of you agree before any money moves.
+            Write it in plain words. Claude turns it into checks that both of you agree before any money moves.
           </p>
 
           <Step n={1} title="The brief" done={!!checks}>

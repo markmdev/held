@@ -20,6 +20,8 @@ const QUESTIONS = [
 // The ledger's agent: AG Studio's own agents, on Claude through Held's worker.
 const agent: AgAiHarnessSetup = ({ api }) => createAiHarness(api as AgStudioApi, { adapter: claudeAdapter, primary: "lead", promptStarters: QUESTIONS });
 
+const CHAT_WORDS = { panelTitleAi: "Ask about the ledger", aiMessageInputPlaceholder: "Ask a question about these jobs", aiNewChat: "New question", aiSubmitButton: "Ask" };
+
 export function Ledger() {
   const { data: rows, error, reload } = useLedger();
   const data = useMemo(() => (rows ? ledgerData(rows) : undefined), [rows]);
@@ -67,8 +69,9 @@ export function Ledger() {
             {/* While the chat is open the button and the dashboard together fill the screen under the top bar,
                 so the question box stays in view and the canvas scrolls inside. */}
             <div ref={studio} className="scroll-mt-[76px]">
-              <div className="mb-3 hidden justify-end min-[720px]:flex">
-                <button className="btn btn-quiet" onClick={() => setAsking((a) => !a)}>
+              <div className="mb-3 flex min-h-11 items-center justify-between gap-4">
+                <span className="font-mono text-[11.5px] tracking-[0.12em] text-ink-2 uppercase">Built with AG Studio · click a bar or a row to filter</span>
+                <button className="btn btn-quiet hidden shrink-0 min-[720px]:inline-flex" onClick={() => setAsking((a) => !a)}>
                   {asking ? "Done asking" : "Ask about the ledger"}
                 </button>
               </div>
@@ -86,6 +89,7 @@ export function Ledger() {
                   mode={asking ? "edit" : "view"}
                   panels={{ view: { left: [], right: [] }, edit: { left: [], right: ["ai"] } }}
                   ai={agent}
+                  localeText={CHAT_WORDS}
                   responsiveLayoutBreakpoints={layout.breakpoints}
                   style={{ height: "100%" }}
                 />

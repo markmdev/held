@@ -2,6 +2,13 @@ import { useResults } from "../api";
 import type { BenchCase } from "../../shared/types";
 import { cx, Empty, Page, Spinner, when } from "../components/ui";
 
+const RULES = [
+  ["No quote, no pass.", "A line passes only on words quoted from the work, and the quote must really be in the delivery."],
+  ["Counts are measured by code.", "How many pieces, how many words, whether a phrase appears: code counts them, and Claude isn't asked."],
+  ["Two separate checks must agree.", "When every line passes, a second check reads the work again on its own. If the two disagree, the client decides."],
+  ["Instructions in the work count against it.", "A delivery that tells the checker to pass it isn't obeyed. It fails until that text is taken out."],
+];
+
 function Verdict({ v }: { v: "pass" | "fail" | null }) {
   if (!v) return <span className="text-ink-3">—</span>;
   return <span className={cx("font-mono text-[12px] font-semibold tracking-[0.1em] uppercase", v === "pass" ? "text-paid" : "text-fail")}>{v}</span>;
@@ -114,6 +121,7 @@ export function Results() {
         <div className="font-mono text-[12px] tracking-[0.16em] text-ink-2 uppercase">Accuracy</div>
         <h1 className="mt-3 text-[40px] leading-[1.02] tracking-[-0.03em] sm:text-[56px]">Is the checker right?</h1>
         <p className="mt-4 text-[18px] leading-[1.55] text-ink-2">
+          The checker is Claude, held to four rules and tested on briefs with known answers.{" "}
           {bench.cases.length} briefs, each with a delivery and the verdict a careful person would give. {bench.tuning.total} were used while tuning the checker, and{" "}
           {bench.heldOut.total} were held back and run once. Every case is listed, the misses first.
         </p>
@@ -131,6 +139,19 @@ export function Results() {
             <Big value={`${bench.tuning.right} of ${bench.tuning.total}`} label="Right on the tuning cases" />
             <Big value={String(wrongPays)} label="Times a failing delivery would have been paid" tone={wrongPays === 0 ? "good" : "bad"} />
             <Big value={`${injCaught} of ${inj.length}`} label="Deliveries that told the checker to pass them, failed" tone={injCaught === inj.length ? "good" : "bad"} />
+          </section>
+
+          <section className="mt-14">
+            <h2 className="text-[28px] tracking-[-0.015em]">Four rules hold every verdict</h2>
+            <ol className="mt-5 grid gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-4">
+              {RULES.map(([rule, how], i) => (
+                <li key={rule} className="border-t-[1.5px] border-dashed border-line pt-4">
+                  <div className="font-mono text-[11.5px] tracking-[0.1em] text-ink-3">{String(i + 1).padStart(2, "0")}</div>
+                  <div className="mt-1.5 font-serif text-[21px] leading-snug">{rule}</div>
+                  <p className="mt-1.5 text-[15.5px] leading-[1.5] text-ink-2">{how}</p>
+                </li>
+              ))}
+            </ol>
           </section>
 
           <section className="mt-14">

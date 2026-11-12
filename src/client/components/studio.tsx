@@ -268,7 +268,7 @@ function ledgerReport(widgetLayout: Record<string, AgWidgetLayoutState>): AgRepo
           "seconds-to-paid": {
             type: "column-chart-grouped",
             dataMapping: { categoryKey: [{ id: "paid.label" }], valueKey: [{ id: "paid.seconds", aggregation: "min" }] },
-            format: { ...title("Seconds from delivery to paid", "Each job paid on a pass"), crossFilter: "highlight" },
+            format: { ...title("Seconds to paid", "From delivery, for each job paid on a pass"), crossFilter: "highlight" },
           },
           verdicts: {
             type: "bar-chart-stacked",

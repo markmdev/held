@@ -41,7 +41,8 @@ Everything else is ink on paper: `ink`, `ink-2`, `ink-3` for text, `line` and `l
 ## Words
 
 - Say what the person sees and does: "Release $150 now", "Not yet", "Your call". No internal words such as authorization, capture or outcome on screen; PayPal's own names stay only beside their IDs on the receipt.
-- No third-party names or logos on screen besides PayPal's own buttons: say "AI check", not the model's name.
+- Three names besides Held's own are on screen, each where it does the work: PayPal beside the money and its IDs, Claude where the work is checked (the home page, the checking strip, new job, Accuracy), and "Built with AG Studio" on the ledger. No other third-party names or logos.
+- The second check is always called the "second check", on the receipt under the check lines and in "What happened".
 - Held reads as a product in test mode, not a demo: "Test mode", "Sample job", "Try a sample job", "A draft that falls short", "The finished work". Never "demo", "example" or "hackathon".
 - A failure says what happened and what to do next, and never looks like an empty page.
 
