@@ -25,7 +25,7 @@ export function NewJob() {
   const config = useConfig();
   const [brief, setBrief] = useState(example ? EXAMPLE.brief : "");
   const [price, setPrice] = useState(example ? EXAMPLE.amount.replace(/\.00$/, "") : "");
-  const [email, setEmail] = useState(example ? "freelancer@held.example" : "");
+  const [email, setEmail] = useState(example ? "freelancer@held.example.com" : "");
   const [title, setTitle] = useState("");
   const [checks, setChecks] = useState<Check[] | null>(null);
   const [busy, setBusy] = useState<"checks" | "hold" | null>(null);

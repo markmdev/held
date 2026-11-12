@@ -6,7 +6,7 @@ export const SAMPLE_JOB: Job = {
   id: "job_sample",
   title: EXAMPLE.title,
   brief: EXAMPLE.brief,
-  freelancerEmail: "freelancer@held.example",
+  freelancerEmail: "freelancer@held.example.com",
   createdAt: "2026-11-12T13:40:00.000Z",
   seeded: false,
   checks: [
