@@ -60,6 +60,7 @@ export type Job = {
   deliveries: Delivery[];
 };
 
+/** benchRight counts the harder cases as they came out on their first run. */
 export type Stats = { jobsPaid: number; medianSecondsToPaid: number | null; medianSecondsToPayout: number | null; benchRight: number; benchTotal: number };
 export type LedgerRow = Pick<Job, "id" | "title" | "createdAt" | "seeded"> & {
   state: MoneyState;

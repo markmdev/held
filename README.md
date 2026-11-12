@@ -4,7 +4,7 @@
 
 PayPal holds the client's money while a freelancer works. Claude checks the delivered work against the brief both sides agreed, and the freelancer is paid within a minute of passing, with no invoice and no chasing.
 
-**Try it:** https://held.markmorgan-dev.workers.dev
+**Try it:** https://heldpayments.com
 
 It's for freelancers who sell work with a clear brief (writing, translation, design assets, small web jobs) and for the clients who hire them without knowing them. In the Freelancers Union's survey of 5,358 freelancers, one in two had trouble getting paid in a single year, and the longest wait averaged 98 days. A client who pays up front has the opposite risk: poor work, already paid for.
 
@@ -18,10 +18,10 @@ It's for freelancers who sell work with a clear brief (writing, translation, des
 
 ## Results
 
-- Every job run on the live site is in the [ledger](https://held.markmorgan-dev.workers.dev/ledger), with PayPal's sandbox IDs for its hold, capture and payout.
+- Every job run on the live site is in the [ledger](https://heldpayments.com/ledger), with PayPal's sandbox IDs for its hold, capture and payout.
 - Median 11.4 seconds from delivery to capture, and 26.9 seconds from delivery to PayPal reporting the payout processed, over the paid jobs in the ledger. The live numbers are at `/api/stats`.
 - A test set of 30 brief-and-delivery pairs with an answer key, written on 12 November 2026: 20 of 20 verdicts right on the cases used while tuning the prompts, and 10 of 10 on the cases held back from tuning.
-- Ten harder cases, written after the checker was finished: near misses, the wrong subject, a slip in tone only, a PDF, two images, a link and odd layouts. On their first run, 5 of 10 were right. All five wrong verdicts refused good work (a PDF, an image, a link, a table and work with a cover note); none paid for bad work. Each miss showed a real fault, and the [results page](https://held.markmorgan-dev.workers.dev/results) gives each one's cause and fix. With those fixes, the same ten score 10 of 10, and the first 30 are unchanged.
+- Ten harder cases, written after the checker was finished: near misses, the wrong subject, a slip in tone only, a PDF, two images, a link and odd layouts. On their first run, 5 of 10 were right. All five wrong verdicts refused good work (a PDF, an image, a link, a table and work with a cover note); none paid for bad work. Each miss showed a real fault, and the [results page](https://heldpayments.com/results) gives each one's cause and fix. With those fixes, the same ten score 10 of 10, and the first 30 are unchanged.
 - Money released on a failing delivery: 0 times, over all 40 cases.
 - Five deliveries contain text telling the checker to pass them: none was paid.
 
@@ -88,7 +88,7 @@ Seeded: the example brief and its two sample deliveries; six finished jobs in th
 
 ## Try it
 
-1. Open https://held.markmorgan-dev.workers.dev and press "Try a sample job".
+1. Open https://heldpayments.com and press "Try a sample job".
 2. Press "Turn the brief into checks", then "Agree the checks and hold $150".
 3. On the job's page, press the PayPal button and log in with PayPal's sandbox buyer: `client@held.example.com`, password `HeldJudge2026!` (also printed beside the button).
 4. Deliver "A draft that falls short": the money stays held, and you see what's missing.
@@ -131,7 +131,7 @@ It takes about a minute and a half, prints each verdict against the answer key a
 
 ## Sponsor tool: AG Studio from AG Grid
 
-The [ledger](https://held.markmorgan-dev.workers.dev/ledger) is an AG Studio dashboard in Held's theme: totals for money held and paid, the median time to paid, charts of each job's money, of seconds from delivery to paid, and of verdicts, a grid of every job with PayPal's IDs, and Held's own widget, the proof trail, which shows the selected job's PayPal steps and each check's verdict with its quote. The code is in [`src/client/components/studio.tsx`](src/client/components/studio.tsx).
+The [ledger](https://heldpayments.com/ledger) is an AG Studio dashboard in Held's theme: totals for money held and paid, the median time to paid, charts of each job's money, of seconds from delivery to paid, and of verdicts, a grid of every job with PayPal's IDs, and Held's own widget, the proof trail, which shows the selected job's PayPal steps and each check's verdict with its quote. The code is in [`src/client/components/studio.tsx`](src/client/components/studio.tsx).
 
 "Ask about the ledger" opens AG Studio's AI assistant beside the dashboard, at laptop width. Its agents run on Claude through an `AgLlmAdapter` ([`src/client/agent.ts`](src/client/agent.ts)) that sends each turn to Held's worker ([`src/worker/agent.ts`](src/worker/agent.ts)), so the key stays on the server. Ask "Which jobs failed, and why?" and it reads the ledger's data, adds a table of the failed jobs with what each is missing, and answers in words, in under a minute.
 

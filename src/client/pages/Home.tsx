@@ -90,7 +90,7 @@ export function Home() {
           <div className="mt-10 flex flex-wrap gap-x-9 gap-y-5 border-t-[1.5px] border-dashed border-line pt-6">
             <Fact href="/ledger" value={stats ? String(stats.jobsPaid) : "–"} label="Jobs paid" />
             <Fact href="/ledger" value={seconds(stats?.medianSecondsToPaid)} label="Median, delivery to paid" />
-            <Fact href="/results" value={stats?.benchTotal ? `${stats.benchRight} of ${stats.benchTotal}` : "–"} label="Test verdicts right" />
+            <Fact href="/results" value={stats?.benchTotal ? `${stats.benchRight} of ${stats.benchTotal}` : "–"} label="Test verdicts right, first run" />
           </div>
         </div>
         {proofId && <ReplayOf id={proofId} />}

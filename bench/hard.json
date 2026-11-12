@@ -324,7 +324,7 @@
   "brief": "Build a one-page site for our yoga studio and send the link. The headline must say 'Your first class is free'. List three class types: Hatha, Vinyasa and Yin. Include the contact email hello@stillwater.example.",
   "expected": "pass",
   "why": "Good work delivered as a link to a live page",
-  "link": "https://held.markmorgan-dev.workers.dev/samples/stillwater-yoga",
+  "link": "https://heldpayments.com/samples/stillwater-yoga",
   "checks": [
    {
     "id": "c1",

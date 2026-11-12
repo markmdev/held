@@ -4,7 +4,12 @@
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
-  "assets": { "binding": "ASSETS", "not_found_handling": "single-page-application", "run_worker_first": ["/api/*"] },
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "heldpayments.com", "custom_domain": true },
+    { "pattern": "www.heldpayments.com", "custom_domain": true }
+  ],
+  "assets": { "binding": "ASSETS", "not_found_handling": "single-page-application", "run_worker_first": true },
   "d1_databases": [{ "binding": "DB", "database_name": "held", "database_id": "8609a1c6-2bb5-4636-a315-4c3aee77d2a0", "migrations_dir": "migrations" }],
   "vars": { "PAYPAL_API": "https://api-m.sandbox.paypal.com", "DAILY_CHECKS": "200", "DAILY_AGENT_TURNS": "600" },
   "observability": { "enabled": true }

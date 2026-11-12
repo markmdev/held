@@ -68,7 +68,7 @@ app.get("/stats", async (c) => {
     "SELECT (julianday(j.payout_done_at) - julianday(d.at)) * 86400 AS s FROM jobs j JOIN deliveries d ON d.job_id = j.id WHERE d.seconds_to_paid IS NOT NULL AND j.payout_done_at IS NOT NULL",
   ).all<{ s: number }>();
   const b = bench as BenchResult;
-  return c.json<Stats>({ jobsPaid: paid?.n ?? 0, medianSecondsToPaid: median(s), medianSecondsToPayout: median(payouts.map((r) => r.s)), benchRight: b.tuning.right + b.heldOut.right + b.hard.right, benchTotal: b.tuning.total + b.heldOut.total + b.hard.total });
+  return c.json<Stats>({ jobsPaid: paid?.n ?? 0, medianSecondsToPaid: median(s), medianSecondsToPayout: median(payouts.map((r) => r.s)), benchRight: b.tuning.right + b.heldOut.right + b.hardFirst.right, benchTotal: b.tuning.total + b.heldOut.total + b.hard.total });
 });
 
 app.get("/ledger", async (c) => c.json(await ledger(c.env.DB)));
@@ -244,4 +244,15 @@ app.post("/paypal/webhook", async (c) => {
   return c.body(null, 200);
 });
 
-export default app;
+// The worker answers every request: www goes to the bare address, /api goes to the routes above, and the
+// pages and files are served as they were.
+export default {
+  fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    const url = new URL(request.url);
+    if (url.hostname.startsWith("www.")) {
+      url.hostname = url.hostname.slice(4);
+      return Response.redirect(url.toString(), 301);
+    }
+    return url.pathname.startsWith("/api/") ? app.fetch(request, env, ctx) : env.ASSETS.fetch(request);
+  },
+};

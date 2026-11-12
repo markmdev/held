@@ -91,7 +91,7 @@ async function build() {
     { id: "returns-policy-pdf", brief: POLICY, expected: "pass", why: "Good work delivered as a PDF", file: { name: "returns-policy.pdf", type: "application/pdf" } },
     { id: "bakery-image", brief: IMAGE, expected: "pass", why: "Good work delivered as an image", file: { name: "bakery-opening.png", type: "image/png" } },
     { id: "bakery-image-wrong-day", brief: IMAGE, expected: "fail", why: "An image that says Sunday where the brief says Saturday", file: { name: "bakery-opening-sunday.png", type: "image/png" } },
-    { id: "yoga-site-link", brief: SITE, expected: "pass", why: "Good work delivered as a link to a live page", link: "https://held.markmorgan-dev.workers.dev/samples/stillwater-yoga" },
+    { id: "yoga-site-link", brief: SITE, expected: "pass", why: "Good work delivered as a link to a live page", link: "https://heldpayments.com/samples/stillwater-yoga" },
     { id: "faq-as-a-table", brief: FAQ, expected: "pass", why: `Good work laid out as a table, one row per answer (counts: ${faq.map(count).join(", ")})`, delivery: `| Question | Answer |\n|---|---|\n${questions.map((q, i) => `| ${q} | ${faq[i]} |`).join("\n")}` },
   ];
 
