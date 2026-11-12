@@ -48,6 +48,20 @@ export const makeChecks = (brief: string) => api<{ title: string; checks: Check[
 // can't release or cancel the money.
 const keyName = (id: string) => `held.client.${id}`;
 export const clientKey = (id: string) => localStorage.getItem(keyName(id));
+export const jobLink = (id: string) => `${location.origin}/j/${id}`;
+
+// The client link carries the key after a #, which a browser never sends to a server. Opening it gives that
+// browser the client's buttons and leaves the plain link in the address bar.
+export function clientLink(id: string) {
+  const key = clientKey(id);
+  return key && `${jobLink(id)}#client=${key}`;
+}
+export function takeClientLink(id: string) {
+  const key = /^#client=([0-9a-f]{64})$/.exec(location.hash)?.[1];
+  if (!key) return;
+  localStorage.setItem(keyName(id), key);
+  history.replaceState(null, "", location.pathname);
+}
 const asClient = (id: string) => ({ "x-client-key": clientKey(id) ?? "" });
 
 export async function createJob(j: { title: string; brief: string; amount: string; freelancerEmail: string; checks: Check[] }) {

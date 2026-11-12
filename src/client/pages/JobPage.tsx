@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { cancel, clientKey, deliver, fileToBase64, HeldError, release, useConfig, useJob } from "../api";
+import { cancel, clientKey, clientLink, deliver, fileToBase64, HeldError, jobLink, release, takeClientLink, useConfig, useJob } from "../api";
 import { ActionPanel, DeliveryCard, ShareLink, type Busy, type DeliverInput } from "../components/job";
 import { Receipt, Timeline } from "../components/receipt";
 import { PayPalHold } from "../components/PayPalHold";
@@ -8,6 +8,7 @@ import { EXAMPLE, FINISHED, UNFINISHED } from "../../shared/example";
 import type { Delivery, Job } from "../../shared/types";
 
 export function JobPage({ id }: { id: string }) {
+  useState(() => takeClientLink(id));
   const { data: job, error, reload, setData } = useJob(id);
   const config = useConfig();
   const [busy, setBusy] = useState<Busy>(null);
@@ -75,6 +76,7 @@ export function JobPage({ id }: { id: string }) {
   const deliveries = shown.map((d, i) => ({ d, n: i + 1 })).reverse();
   const st = job.money.state;
   const last = shown.at(-1);
+  const mine = (st === "awaiting_hold" || st === "held") && !job.money.expired ? clientLink(job.id) : null;
 
   return (
     <Page>
@@ -83,8 +85,14 @@ export function JobPage({ id }: { id: string }) {
           <div className="label mb-3">What happened</div>
           <Timeline job={view} />
           <div className="mt-7">
-            <ShareLink id={job.id} />
+            <ShareLink url={jobLink(job.id)} label="Copy the job's link" />
             <p className="mt-2 text-[14px] leading-snug text-ink-3">One page for both sides. Send it to the freelancer.</p>
+            {mine && (
+              <div className="mt-5">
+                <ShareLink url={mine} label="Copy your client link" />
+                <p className="mt-2 text-[14px] leading-snug text-ink-3">Keep this one to yourself: it opens the job with the release and cancel buttons in another browser.</p>
+              </div>
+            )}
           </div>
         </aside>
 

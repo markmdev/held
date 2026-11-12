@@ -200,7 +200,7 @@ async function release(env: Env, row: Awaited<ReturnType<typeof getJobRow>> & {}
 
 // Releasing by hand and cancelling are the client's alone: they need the key the job's maker was given.
 // The seeded jobs in the ledger have no client, so nobody can move their money.
-const notClient = (c: C, row: { seeded: number }) => fail(c, 403, row.seeded ? SAMPLE_JOB : "Only the client can do this, from the browser where the job was made.");
+const notClient = (c: C, row: { seeded: number }) => fail(c, 403, row.seeded ? SAMPLE_JOB : "Only the client can do this, with the job's client link.");
 
 app.post("/jobs/:id/release", async (c) => {
   const row = await getJobRow(c.env.DB, c.req.param("id"));

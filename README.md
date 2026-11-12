@@ -14,13 +14,13 @@ It's for freelancers who sell work with a clear brief (writing, translation, des
 2. Claude turns the brief into a short list of checks, such as "5 descriptions", "80 to 120 words each", "each says dishwasher-safe". Both sides see them before any money moves.
 3. The client approves the payment in PayPal. PayPal places a hold on the money without taking it.
 4. The freelancer delivers on the job's page: pasted text, a file (text, PDF, PNG or JPG) or a link. Claude checks the delivery against each check and quotes the line behind each verdict.
-5. If every check passes, PayPal captures the hold and pays the freelancer at once. If not, the money stays held and the freelancer sees exactly what's missing. The client can always release the money anyway, release a part, or cancel the hold. The freelancer has the same link but not those buttons.
+5. If every check passes, PayPal captures the hold and pays the freelancer at once. If not, the money stays held and the freelancer sees exactly what's missing. The client can always release the money anyway, release a part, or cancel the hold. The link sent to the freelancer has no such buttons.
 
 ## Results
 
 - Every job run on the live site is in the [ledger](https://heldpayments.com/ledger), with PayPal's sandbox IDs for its hold, capture and payout.
-- At submission the ledger holds seven jobs, five of them paid. The seventh is the job paid in the video.
-- Median 11.6 seconds from delivery to capture, and 27.0 seconds from delivery to PayPal reporting the payout processed, over those five paid jobs. Every run on the live site adds to them; the live numbers are at `/api/stats`.
+- At submission the ledger holds nine jobs, seven of them paid. One is the job paid in the video. Two aren't writing: a design delivered as an image and a one-page site delivered as a link.
+- Median 11.1 seconds from delivery to capture, and 26.8 seconds from delivery to PayPal reporting the payout processed, over those seven paid jobs. Every run on the live site adds to them; the live numbers are at `/api/stats`.
 - 35 of 40 verdicts right on the first run of a test set with an answer key, written on 12 November 2026: 20 of 20 on the cases used while tuning the prompts, 10 of 10 on the cases held back from tuning, and 5 of 10 on ten harder cases written after the checker was finished (near misses, the wrong subject, a slip in tone only, a PDF, two images, a link and odd layouts).
 - All five wrong verdicts refused good work (a PDF, an image, a link, a table and work with a cover note); none paid for bad work. Each miss showed a real fault, and the [results page](https://heldpayments.com/results) gives each one's cause and fix. With those fixes, `npm run bench` gets all 40 right today: it prints 20 of 20, 10 of 10 and 10 of 10. The harder cases' first-run verdicts are kept in [`bench/hard-first-run.json`](bench/hard-first-run.json).
 - Money released on a failing delivery: 0 times, over all 40 cases.
@@ -67,7 +67,7 @@ Every call uses structured output, so a verdict is always one of pass or fail wi
 
 ## Technological Implementation
 
-The money moves through PayPal's Orders, Payments and Payouts APIs: an authorization holds the client's money, a capture takes all or part of it, a void cancels it, and a payout sends what was taken to the freelancer. Claude turns the brief into checks and checks every delivery twice, with code counting what can be counted and refusing any pass without a quote. The test set of 40 cases runs through the same code the live site uses, with one command, and the faults its harder cases found are fixed with their tests in the repo. Only the client can release or cancel by hand: the job's maker gets a key that stays in their browser, and the server keeps only its hash.
+The money moves through PayPal's Orders, Payments and Payouts APIs: an authorization holds the client's money, a capture takes all or part of it, a void cancels it, and a payout sends what was taken to the freelancer. Claude turns the brief into checks and checks every delivery twice, with code counting what can be counted and refusing any pass without a quote. The test set of 40 cases runs through the same code the live site uses, with one command, and the faults its harder cases found are fixed with their tests in the repo. Only the client can release or cancel by hand: the job's maker gets a key, kept in their browser and in a client link only they hold, and the server keeps only its hash.
 
 Built with React, TypeScript and Tailwind CSS, on one Cloudflare Worker (Hono for the API, D1 for the database), with the ledger in AG Studio.
 
@@ -77,7 +77,7 @@ Both sides share one page per job, from the brief to the payment, and each sees 
 
 ## Potential Impact
 
-Freelancers wait because payment waits for the client to say the work is done, and that sign-off is where the weeks go. Half of the 5,358 freelancers in the Freelancers Union's 2015 survey had trouble getting paid in 2014, losing $5,968 on average that year, and the longest wait averaged 98 days. Held takes the sign-off away: both sides agree what "done" means before the money is set aside, the freelancer is paid seconds after the work passes, and the client never pays for work that misses the brief. A client who means to pay gives nothing up by holding: the money isn't taken until the work passes, and it stays theirs if they cancel or the hold runs out. It runs on PayPal alone, so there's no marketplace taking a cut on top of PayPal's usual fees.
+Freelancers wait because payment waits for the client to say the work is done, and that sign-off is where the weeks go. Half of the 5,358 freelancers in the Freelancers Union's 2015 survey had trouble getting paid in 2014, losing $5,968 on average that year, and the longest wait averaged 98 days. Held takes the sign-off away: both sides agree what "done" means before the money is set aside, the freelancer is paid seconds after the work passes, and the client never pays for work that misses the brief. A client who means to pay gives nothing up by holding: the money isn't taken until the work passes, and it stays theirs if they cancel or the hold runs out. The ledger shows it on more than writing: a design delivered as an image and a one-page site delivered as a link were each checked and paid the same way. It runs on PayPal alone, so there's no marketplace taking a cut on top of PayPal's usual fees.
 
 ## Innovation/Idea
 
@@ -91,7 +91,7 @@ The video shows one real run on the live site, from the brief to the freelancer 
 
 Everything was built on 12 November 2026, from an empty repo. Every PayPal call moves sandbox money, every verdict is a live Claude call, and every time shown is measured.
 
-Seeded: the example brief and its two sample deliveries; six finished jobs in the ledger, made by running the real flow on the live site before submitting, so each has real sandbox IDs (four paid, one held after a failed delivery, one cancelled); and the test set of 40. The seventh job in the ledger is the run filmed for the video. The six seeded jobs are locked: nobody can deliver on them or move their money.
+Seeded: the example brief and its two sample deliveries; six finished jobs in the ledger, made by running the real flow on the live site before submitting, so each has real sandbox IDs (four paid, one held after a failed delivery, one cancelled); and the test set of 40. The other three jobs in the ledger are real runs made after those six: the one filmed for the video, a design delivered as an image and a one-page site delivered as a link. The six seeded jobs are locked: nobody can deliver on them or move their money.
 
 ## Try it
 
@@ -146,7 +146,7 @@ The [ledger](https://heldpayments.com/ledger) is an AG Studio dashboard in Held'
 
 ## Limits
 
-Sandbox money only. On live PayPal, PayPal's usual fees apply. The checker suits work with a clear brief. Good work in a form the checker hasn't seen may still be refused, which only holds the money for the client to release. When the two checks disagree, a person decides. PayPal keeps a hold for 29 days; one that runs out shows as expired, and the money stays with the client. PayPal only promises a hold's money for its first 3 days; after that a capture can be declined, and Held doesn't renew the hold yet. There are no accounts yet: the client is whoever made the job, in that browser, so a live version needs both sides to sign in.
+Sandbox money only. On live PayPal, PayPal's usual fees apply. The checker suits work with a clear brief. Good work in a form the checker hasn't seen may still be refused, which only holds the money for the client to release. When the two checks disagree, a person decides. PayPal keeps a hold for 29 days; one that runs out shows as expired, and the money stays with the client. PayPal only promises a hold's money for its first 3 days; after that a capture can be declined, and Held doesn't renew the hold yet. There are no accounts yet: the client is whoever holds the job's client link, so a live version needs both sides to sign in.
 
 ## Licence
 

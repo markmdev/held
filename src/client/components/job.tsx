@@ -218,7 +218,7 @@ export function ActionPanel({ job, actions, hold, client }: { job: Job; actions:
         {freelancer}
         <Side who="Client" title={disagreed ? "The checks disagree: the client decides" : "The client's call"}>
           <p className="text-[14.5px] leading-relaxed text-ink-2">
-            Only the client can release the money or cancel the hold, from the browser where the job was made.
+            Only the client can release the money or cancel the hold, from the browser where the job was made or one opened with the client link.
           </p>
         </Side>
         {error}
@@ -263,7 +263,7 @@ export function ActionPanel({ job, actions, hold, client }: { job: Job; actions:
           </button>
         </div>
         <p className="mt-3 text-[12.5px] leading-relaxed text-ink-3">
-          Releasing pays the freelancer now, whatever the checks say. Cancelling gives up the hold, so the money stays with you. Only this browser, where the job was made, has these buttons.
+          Releasing pays the freelancer now, whatever the checks say. Cancelling gives up the hold, so the money stays with you. Only a browser with your client link has these buttons.
         </p>
       </Side>
       {error}
@@ -271,9 +271,8 @@ export function ActionPanel({ job, actions, hold, client }: { job: Job; actions:
   );
 }
 
-export function ShareLink({ id }: { id: string }) {
+export function ShareLink({ url, label }: { url: string; label: string }) {
   const [copied, setCopied] = useState(false);
-  const url = typeof location !== "undefined" ? `${location.origin}/j/${id}` : `/j/${id}`;
   return (
     <button
       onClick={() => {
@@ -283,7 +282,7 @@ export function ShareLink({ id }: { id: string }) {
       }}
       className="inline-flex items-center gap-2 border-[1.5px] border-ink px-3 py-2 font-mono text-[11.5px] tracking-[0.1em] text-ink uppercase transition-colors duration-150 hover:bg-ink hover:text-card"
     >
-      {copied ? "Link copied" : "Copy the job's link"}
+      {copied ? "Link copied" : label}
     </button>
   );
 }
