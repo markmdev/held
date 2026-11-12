@@ -3,8 +3,8 @@ import type { BenchCase } from "../../shared/types";
 import { cx, Empty, Page, Spinner, when } from "../components/ui";
 
 const RULES = [
-  ["No quote, no pass.", "A line passes only on words quoted from the work, and the quote must really be in the delivery."],
-  ["Counts are measured by code.", "How many pieces, how many words, whether a phrase appears: code counts them, and Claude isn't asked."],
+  ["No quote, no pass.", "A line passes only on words quoted from the work, and a quote that isn't in the delivery fails it. A check that something is absent needs no quote."],
+  ["Counts are measured by code.", "How many pieces, how many words, whether a phrase appears: in text, PDFs and linked pages, code counts them, and Claude isn't asked."],
   ["Two separate checks must agree.", "When every line passes, a second check reads the work again on its own. If the two disagree, the client decides."],
   ["Instructions in the work count against it.", "A delivery that tells the checker to pass it isn't obeyed. It fails until that text is taken out."],
 ];
