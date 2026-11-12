@@ -31,7 +31,7 @@ export function imageSize(b: Uint8Array, type: string): { width: number; height:
   return null;
 }
 
-export async function readDelivery(d: Incoming): Promise<Read> {
+export async function readDelivery(d: Incoming, get: (url: string, init: RequestInit) => Promise<Response> = fetch): Promise<Read> {
   if (d.text?.trim()) {
     const text = d.text.slice(0, 60000);
     return { label: "Pasted text", text, blocks: [{ type: "text", text }], form: ["Delivered as pasted text.", total(text)] };
@@ -61,7 +61,7 @@ export async function readDelivery(d: Incoming): Promise<Read> {
     throw new Error("bad: Deliver text, a PDF, or a PNG or JPG image.");
   }
   if (d.link && /^https?:\/\//.test(d.link)) {
-    const res = await fetch(d.link, { headers: { "user-agent": "HeldChecker/1.0" }, redirect: "follow" }).catch(() => null);
+    const res = await get(d.link, { headers: { "user-agent": "HeldChecker/1.0" }, redirect: "follow" }).catch(() => null);
     if (!res?.ok) throw new Error("bad: The link didn't load.");
     const html = (await res.text()).slice(0, 400000);
     const text = html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ").replace(/<br\s*\/?>|<\/(p|div|li|h\d)>/gi, "\n").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/[ \t]+/g, " ").replace(/\n\s*\n+/g, "\n\n").trim().slice(0, 60000);

@@ -13,6 +13,7 @@ import { agentTurn } from "./agent";
 
 type Env = {
   DB: D1Database;
+  ASSETS: Fetcher;
   ANTHROPIC_API_KEY: string;
   PAYPAL_API: string;
   PAYPAL_CLIENT_ID: string;
@@ -139,7 +140,9 @@ app.post("/jobs/:id/deliveries", async (c) => {
   if (row.money_state !== "held") return fail(c, 409, row.money_state === "awaiting_hold" ? "The client hasn't held the money yet." : "This job is closed.");
   let delivery;
   try {
-    delivery = await readDelivery((await c.req.json().catch(() => ({}))) as Incoming);
+    // A Worker can't fetch its own address, so a link to one of Held's own pages is read from its files.
+    const own = new URL(c.req.url).host;
+    delivery = await readDelivery((await c.req.json().catch(() => ({}))) as Incoming, (url, init) => (new URL(url).host === own ? c.env.ASSETS.fetch(url, init) : fetch(url, init)));
   } catch (e) {
     const m = (e as Error).message;
     if (m.startsWith("bad: ")) return fail(c, 400, m.slice(5), "bad_request");
