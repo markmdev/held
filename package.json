@@ -20,6 +20,7 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tailwindcss": "^4.3.5",
+    "unpdf": "2.1.0",
     "wouter": "^3.13.0"
   },
   "devDependencies": {
