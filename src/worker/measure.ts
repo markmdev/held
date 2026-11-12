@@ -14,7 +14,25 @@ export function splitItems(text: string): string[] {
       else if (items.length && line.trim()) items[items.length - 1] += " " + line.trim();
     }
   } else {
-    items = text.split(/\n\s*\n/);
+    // A short line on its own, such as a product name or a heading, belongs to the paragraph under it.
+    items = [];
+    let title = "";
+    for (const block of text.split(/\n\s*\n/)) {
+      const b = block.trim();
+      if (!b) continue;
+      if (!b.includes("\n") && words(b) <= 6 && !/[.!?:]["”’)]?$/.test(b)) {
+        title = title ? `${title} ${b}` : b;
+        continue;
+      }
+      items.push(title ? `${title.replace(/^#+\s*|\*\*/g, "")} ${b}` : b);
+      title = "";
+    }
+    if (title) items.push(title);
+    // A plain list, one short line per item with no blank lines between, is one item per line.
+    if (items.length === 1) {
+      const lines = items[0].split("\n").map((l) => l.trim()).filter(Boolean);
+      if (lines.length >= 3 && lines.every((l) => words(l) <= 12)) items = lines;
+    }
   }
   return items.map((s) => s.trim()).filter((s) => s && !(words(s) <= 10 && /:\s*$/.test(s)));
 }

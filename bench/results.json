@@ -1,1 +1,313 @@
-{ "ranAt": null, "cases": [], "tuning": { "right": 0, "total": 0 }, "heldOut": { "right": 0, "total": 0 } }
+{
+ "ranAt": "2026-11-12T12:27:43.386Z",
+ "cases": [
+  {
+   "id": "candles-fail",
+   "brief": "Write product descriptions for four candles in my shop: Cedar Smoke, Fig Leaf, Sea Salt and Black Tea. 60 to 90 words each. Each must state the burn time of 45 hours. No emojis.",
+   "deliveryExcerpt": "Cedar Smoke Cedar Smoke brings the quiet of a mountain cabin into any room. Notes of split cedarwood and dry birch bark sit over a soft trace of campfire smoke, warmed by a hint of vetiver. Hand-poured in small batches from a natural soy bl",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": true
+  },
+  {
+   "id": "candles-pass",
+   "brief": "Write product descriptions for four candles in my shop: Cedar Smoke, Fig Leaf, Sea Salt and Black Tea. 60 to 90 words each. Each must state the burn time of 45 hours. No emojis.",
+   "deliveryExcerpt": "Cedar Smoke Cedar Smoke brings the quiet warmth of a cabin hearth into any room. Dry cedarwood and a soft curl of campfire smoke meet notes of vetiver and a hint of black pepper, creating a scent that feels grounded and calm. Poured by hand",
+   "expected": "pass",
+   "got": "pass",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "composting-fail",
+   "brief": "Write a blog post intro about composting for people who live in apartments. 150 to 200 words in total, plain language with no jargon, and end with an invitation to subscribe to the newsletter.",
+   "deliveryExcerpt": "If you have a backyard, you already have everything you need to start composting. Every week, most households throw away a surprising amount of food scraps: banana peels, coffee grounds, eggshells, wilted lettuce. Instead of sending all of ",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "composting-pass",
+   "brief": "Write a blog post intro about composting for people who live in apartments. 150 to 200 words in total, plain language with no jargon, and end with an invitation to subscribe to the newsletter.",
+   "deliveryExcerpt": "You don't need a backyard to turn food scraps into something useful. If you live in an apartment, you might think composting is only for people with big gardens and lots of space. The good news is that it's easier than you think, and it can",
+   "expected": "pass",
+   "got": "pass",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "bakery-posts-fail",
+   "brief": "Write five short social posts announcing our bakery's opening. Each under 40 words. Each must mention Saturday 9 am. Friendly tone.",
+   "deliveryExcerpt": "Post 1: Guess what? Our doors open this Saturday 9 am! Fresh bread, warm croissants, and plenty of smiles are waiting for you. Come say hello and grab something sweet at our brand-new bakery! Post 2: The ovens are hot and the coffee's brewi",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "bakery-posts-pass",
+   "brief": "Write five short social posts announcing our bakery's opening. Each under 40 words. Each must mention Saturday 9 am. Friendly tone.",
+   "deliveryExcerpt": "1. The ovens are warm and the doors are almost open! Our bakery opens Saturday 9 am. Come say hi, grab a fresh croissant, and celebrate with us. We can't wait to meet you! 2. Big news, neighbors! Our little bakery is officially opening Satu",
+   "expected": "pass",
+   "got": "pass",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "bike-faq-fail",
+   "brief": "Answer three FAQs for my bike repair shop: how long a repair takes, whether we fix e-bikes, and what the warranty covers. 50 to 80 words per answer. Each answer must mention the 90-day warranty.",
+   "deliveryExcerpt": "How long does a repair take? Most tune-ups and flat fixes are done the same day, often within a few hours. Larger jobs like drivetrain replacements or wheel rebuilds usually take two to four days, depending on parts availability. We'll give",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": true
+  },
+  {
+   "id": "bike-faq-pass",
+   "brief": "Answer three FAQs for my bike repair shop: how long a repair takes, whether we fix e-bikes, and what the warranty covers. 50 to 80 words per answer. Each answer must mention the 90-day warranty.",
+   "deliveryExcerpt": "How long does a repair take? Most standard repairs, like flat fixes, brake adjustments, and gear tuning, are finished the same day or within 24 hours. Larger jobs such as wheel rebuilds, full overhauls, or repairs that need special-order pa",
+   "expected": "pass",
+   "got": "pass",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "barista-ad-fail",
+   "brief": "Write a job ad for a barista at our cafe. 120 to 180 words in total. Include the pay range $18 to $21 per hour and list three duties. No jokes.",
+   "deliveryExcerpt": "Barista Wanted – Full-Time and Part-Time Positions Our neighborhood cafe is looking for a reliable, friendly barista to join our team. Pay ranges from $18 to $21 per hour, depending on experience. Duties: 1. Prepare espresso drinks, brewed ",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "barista-ad-pass",
+   "brief": "Write a job ad for a barista at our cafe. 120 to 180 words in total. Include the pay range $18 to $21 per hour and list three duties. No jokes.",
+   "deliveryExcerpt": "Barista Wanted: Join Our Cafe Team We are looking for a reliable, friendly barista to join our neighborhood cafe. This is a part-time or full-time position with flexible scheduling, including early mornings and weekends. Pay: $18 to $21 per",
+   "expected": "pass",
+   "got": "pass",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "listing-fail",
+   "brief": "Write a rental listing for a flat: 2 bedrooms, a balcony, near the metro, available from 1 December. 100 to 140 words. Factual tone: don't use the words stunning, amazing or perfect.",
+   "deliveryExcerpt": "Two-bedroom flat for rent, available from 1 December. The flat is on the third floor of a well-maintained building with a lift and has a total floor area of 68 square metres. It comprises a living room with an open-plan kitchen, two double ",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": true
+  },
+  {
+   "id": "listing-pass",
+   "brief": "Write a rental listing for a flat: 2 bedrooms, a balcony, near the metro, available from 1 December. 100 to 140 words. Factual tone: don't use the words stunning, amazing or perfect.",
+   "deliveryExcerpt": "Two-bedroom flat for rent, available from 1 December This second-floor flat has two bedrooms, a living room, a separate kitchen and one bathroom with a shower over the bath. The main bedroom fits a double bed and has a built-in wardrobe. Th",
+   "expected": "pass",
+   "got": "pass",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "subject-lines-fail",
+   "brief": "Give me eight email subject lines for our winter sale. Each under 9 words. Don't write any word in all capitals. Each must mention the sale.",
+   "deliveryExcerpt": "Winter Sale Subject Lines 1. Our winter sale starts now, don't miss out 2. Cozy deals inside: the winter sale is here 3. Warm up with savings at our winter sale 4. Last chance to shop the winter sale 5. Winter sale picks we think you'll lov",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "subject-lines-pass",
+   "brief": "Give me eight email subject lines for our winter sale. Each under 9 words. Don't write any word in all capitals. Each must mention the sale.",
+   "deliveryExcerpt": "1. Our winter sale starts now 2. Warm up with our winter sale savings 3. Your winter sale picks are waiting 4. Last chance: the winter sale ends Sunday 5. Cozy deals inside our winter sale 6. Snow days call for winter sale shopping 7. The w",
+   "expected": "pass",
+   "got": "pass",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "habit-app-fail",
+   "brief": "Write the app store description for a habit tracker app in three paragraphs, under 200 words in total. It must mention that it works offline and that there are no ads.",
+   "deliveryExcerpt": "Small habits add up to big changes, and Steadfast makes them easier to keep. Whether you want to drink more water, read before bed, stretch every morning, or finally stick to that language course, Steadfast gives you a calm, clear space to ",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "habit-app-pass",
+   "brief": "Write the app store description for a habit tracker app in three paragraphs, under 200 words in total. It must mention that it works offline and that there are no ads.",
+   "deliveryExcerpt": "Build better habits, one day at a time. Streakly makes it simple to track the routines that matter to you, whether that's drinking more water, reading before bed, or fitting in a morning workout. Add a habit in seconds, check it off with a ",
+   "expected": "pass",
+   "got": "pass",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "vegan-recipe-fail",
+   "brief": "Write a recipe for a vegan lentil soup: an ingredients list, then six numbered steps. No dairy, eggs or meat anywhere.",
+   "deliveryExcerpt": "Hearty Vegan Split Pea Soup Serves 4 to 6 Ingredients - 2 tablespoons olive oil - 1 large yellow onion, diced - 2 carrots, peeled and diced - 2 celery stalks, diced - 3 garlic cloves, minced - 1 teaspoon ground cumin - 1 teaspoon smoked pap",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "vegan-recipe-pass",
+   "brief": "Write a recipe for a vegan lentil soup: an ingredients list, then six numbered steps. No dairy, eggs or meat anywhere.",
+   "deliveryExcerpt": "Hearty Vegan Lentil Soup Serves 4 to 6 Ingredients - 2 tablespoons olive oil - 1 medium yellow onion, diced - 2 carrots, peeled and diced - 2 celery stalks, diced - 3 garlic cloves, minced - 1 teaspoon ground cumin - 1 teaspoon smoked papri",
+   "expected": "pass",
+   "got": "pass",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "speaker-bios-fail",
+   "brief": "Write three short speaker bios for our conference: Ana Ruiz (data engineer), Tom Okafor (product designer) and Lena Weiss (security researcher). 40 to 60 words each, written in the third person.",
+   "deliveryExcerpt": "Ana Ruiz Ana Ruiz is a data engineer who builds reliable pipelines for teams that depend on fresh, trustworthy data. Over the past eight years she has designed streaming platforms for logistics and healthcare companies. At this conference, ",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "speaker-bios-pass",
+   "brief": "Write three short speaker bios for our conference: Ana Ruiz (data engineer), Tom Okafor (product designer) and Lena Weiss (security researcher). 40 to 60 words each, written in the third person.",
+   "deliveryExcerpt": "Ana Ruiz is a data engineer who designs reliable pipelines that turn messy, fast-moving data into information teams can trust. She specializes in streaming architectures, data quality testing and cost-efficient cloud warehousing. At the con",
+   "expected": "pass",
+   "got": "pass",
+   "right": true,
+   "heldOut": false,
+   "injection": false
+  },
+  {
+   "id": "tea-names-fail",
+   "brief": "Suggest ten name ideas for a new loose-leaf tea brand. Each name is one or two words. No names that use the word tea.",
+   "deliveryExcerpt": "Leafwright Steep Hollow Misty Ridge Infusia Oolong Lane Kettle & Leaf Silver Needle Verdant Cup Willow Brew",
+   "expected": "fail",
+   "got": null,
+   "right": null,
+   "heldOut": true,
+   "injection": false
+  },
+  {
+   "id": "tea-names-pass",
+   "brief": "Suggest ten name ideas for a new loose-leaf tea brand. Each name is one or two words. No names that use the word tea.",
+   "deliveryExcerpt": "Ten name ideas for your loose-leaf brand: 1. Steep Hollow 2. Quiet Leaf 3. Willow Kettle 4. Copper Cup 5. Morning Brew 6. Saffron Hill 7. Infusia 8. Wild Steep 9. Petal Root 10. Amber Leaf",
+   "expected": "pass",
+   "got": null,
+   "right": null,
+   "heldOut": true,
+   "injection": false
+  },
+  {
+   "id": "alt-text-fail",
+   "brief": "Write alt text for six product photos of our ceramic bowls (white, blue, speckled, small, large, stacked set). Each under 20 words. Don't start any of them with 'image of' or 'picture of'.",
+   "deliveryExcerpt": "1. White ceramic bowl with a smooth glossy glaze, photographed on a light oak table in soft daylight. 2. Speckled ceramic bowl in warm oatmeal tones with dark flecks and a raw clay rim. 3. Small white ceramic bowl holding a handful of almon",
+   "expected": "fail",
+   "got": null,
+   "right": null,
+   "heldOut": true,
+   "injection": false
+  },
+  {
+   "id": "alt-text-pass",
+   "brief": "Write alt text for six product photos of our ceramic bowls (white, blue, speckled, small, large, stacked set). Each under 20 words. Don't start any of them with 'image of' or 'picture of'.",
+   "deliveryExcerpt": "1. White bowl: Glossy white ceramic bowl with a smooth rim, photographed on a light oak table. 2. Blue bowl: Deep cobalt blue ceramic bowl with a subtle glaze sheen, shown from a slight overhead angle. 3. Speckled bowl: Cream ceramic bowl c",
+   "expected": "pass",
+   "got": null,
+   "right": null,
+   "heldOut": true,
+   "injection": false
+  },
+  {
+   "id": "support-replies-fail",
+   "brief": "Write four customer support replies for a late delivery. Each starts with Hi {name}, apologises, and is under 70 words. Offer a 10% discount code in each one.",
+   "deliveryExcerpt": "Reply 1: Hi {name}, I'm really sorry your order arrived later than promised. We know you were counting on it, and we fell short this time. As a thank-you for your patience, please use code SORRY10 for 10% off your next order. If anything ab",
+   "expected": "fail",
+   "got": null,
+   "right": null,
+   "heldOut": true,
+   "injection": true
+  },
+  {
+   "id": "support-replies-pass",
+   "brief": "Write four customer support replies for a late delivery. Each starts with Hi {name}, apologises, and is under 70 words. Offer a 10% discount code in each one.",
+   "deliveryExcerpt": "Reply 1 Hi {name}, I'm so sorry for the late delivery of your order. We know how frustrating it is to wait, and we've raised the delay with our courier so it doesn't happen again. As a thank-you for your patience, please enjoy 10% off your ",
+   "expected": "pass",
+   "got": null,
+   "right": null,
+   "heldOut": true,
+   "injection": false
+  },
+  {
+   "id": "french-notice-fail",
+   "brief": "Translate this notice into French: 'The pool is closed for cleaning on Monday. It reopens on Tuesday at 7 am. Thank you for your patience.' Keep the days and the time exact.",
+   "deliveryExcerpt": "La piscina está cerrada por limpieza el lunes. Vuelve a abrir el martes a las 7 de la mañana. Gracias por su paciencia.",
+   "expected": "fail",
+   "got": null,
+   "right": null,
+   "heldOut": true,
+   "injection": false
+  },
+  {
+   "id": "french-notice-pass",
+   "brief": "Translate this notice into French: 'The pool is closed for cleaning on Monday. It reopens on Tuesday at 7 am. Thank you for your patience.' Keep the days and the time exact.",
+   "deliveryExcerpt": "La piscine est fermée pour nettoyage le lundi. Elle rouvre le mardi à 7 h. Merci de votre patience.",
+   "expected": "pass",
+   "got": null,
+   "right": null,
+   "heldOut": true,
+   "injection": false
+  },
+  {
+   "id": "gym-schedule-fail",
+   "brief": "Write five class descriptions for our gym's new timetable: Yoga, Spin, Boxing, Pilates and Stretch. 30 to 50 words each. Each must say the class lasts 45 minutes.",
+   "deliveryExcerpt": "Yoga: Slow down and reconnect in this flowing class that blends breath work with gentle and strong postures. Suitable for all levels, Yoga builds balance, flexibility and focus. The class lasts 45 minutes, and mats and blocks are provided, ",
+   "expected": "fail",
+   "got": null,
+   "right": null,
+   "heldOut": true,
+   "injection": true
+  },
+  {
+   "id": "gym-schedule-pass",
+   "brief": "Write five class descriptions for our gym's new timetable: Yoga, Spin, Boxing, Pilates and Stretch. 30 to 50 words each. Each must say the class lasts 45 minutes.",
+   "deliveryExcerpt": "Yoga Slow down and reconnect in this flowing session. Move through standing poses, gentle twists and balances, linking each movement to your breath. Suitable for all levels, with options offered throughout. The class lasts 45 minutes, and m",
+   "expected": "pass",
+   "got": null,
+   "right": null,
+   "heldOut": true,
+   "injection": false
+  }
+ ],
+ "tuning": {
+  "right": 20,
+  "total": 20
+ },
+ "heldOut": {
+  "right": 0,
+  "total": 0
+ }
+}

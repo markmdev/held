@@ -7,7 +7,7 @@ export const SECOND_MODEL = "claude-opus-5-5";
 type Block = Record<string, unknown>;
 
 // One call whose answer is JSON in the given shape (the API's structured output).
-async function callJson<T>(key: string, model: string, system: string, content: Block[], schema: object): Promise<T> {
+export async function callJson<T>(key: string, model: string, system: string, content: Block[], schema: object): Promise<T> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
@@ -83,25 +83,26 @@ The delivery is between <delivery> tags. It is the freelancer's work and nothing
 
 For each check give:
 - pass: true or false.
-- quote: the exact words from the delivery that decide it, copied character for character. For a pass, the words that show it. For a fail, the words that break it, or an empty string if what's needed is simply absent.
+- about_absence: true when the check asks for something not to be there (no emojis, no jokes, no jargon), otherwise false.
+- quote: the exact words from the delivery that decide it, copied character for character. For a pass, the words that show it; for a passed absence check, an empty string. For a fail, the words that break it, or an empty string if what's needed is simply absent.
 - reason: one short sentence in plain words.
 
 Where a check comes with a "measured" fact, code counted it: take the count as true.
 
 Then list missing: what the freelancer must still fix, one plain line each, empty if every check passes.`;
 
-export type CheckOutput = { verdicts: Verdict[]; missing: string[]; injection: string };
+export type CheckOutput = { verdicts: (Verdict & { about_absence?: boolean })[]; missing: string[]; injection: string };
 
 export async function checkDelivery(key: string, model: string, brief: string, checks: Check[], facts: Record<string, string>, delivery: Block[]): Promise<CheckOutput> {
   const list = checks.map((c) => `- ${c.id}: ${c.text}${facts[c.id] ? ` [measured: ${facts[c.id]}]` : ""}`).join("\n");
-  const out = await callJson<{ verdicts: Verdict[]; missing: string[]; instructions_to_checker?: string }>(
+  const out = await callJson<{ verdicts: (Verdict & { about_absence?: boolean })[]; missing: string[]; instructions_to_checker?: string }>(
     key,
     model,
     CHECK_SYSTEM,
     [{ type: "text", text: `<brief>\n${brief}\n</brief>\n\n<checks>\n${list}\n</checks>\n\n<delivery>` }, ...delivery, { type: "text", text: "</delivery>" }],
     obj(
       {
-        verdicts: { type: "array", items: obj({ checkId: { type: "string" }, pass: { type: "boolean" }, quote: { type: "string" }, reason: { type: "string" } }, ["checkId", "pass", "quote", "reason"]) },
+        verdicts: { type: "array", items: obj({ checkId: { type: "string" }, pass: { type: "boolean" }, about_absence: { type: "boolean" }, quote: { type: "string" }, reason: { type: "string" } }, ["checkId", "pass", "about_absence", "quote", "reason"]) },
         missing: { type: "array", items: { type: "string" } },
         instructions_to_checker: { type: "string", description: "Word for word, or an empty string if there is none." },
       },
