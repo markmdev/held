@@ -52,7 +52,7 @@ export async function ledger(db: D1Database): Promise<LedgerRow[]> {
       (SELECT MIN(seconds_to_paid) FROM deliveries d WHERE d.job_id = j.id) AS secs
     FROM jobs j WHERE j.money_state != 'awaiting_hold' OR j.seeded = 1 ORDER BY j.created_at DESC LIMIT 500`).all<JobRow & { last_outcome: Delivery["outcome"] | null; secs: number | null }>();
   return results.map((r) => ({
-    id: r.id, title: r.title, createdAt: r.created_at, seeded: !!r.seeded, state: r.money_state, amount: r.captured_amount ?? r.amount,
+    id: r.id, title: r.title, createdAt: r.created_at, seeded: !!r.seeded, state: r.money_state, price: r.amount, amount: r.captured_amount ?? r.amount,
     verdict: r.last_outcome ?? "none", secondsToPaid: r.secs, authorizationId: opt(r.authorization_id), captureId: opt(r.capture_id), payoutBatchId: opt(r.payout_batch_id),
   }));
 }

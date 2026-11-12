@@ -54,6 +54,9 @@ export type Job = {
 export type Stats = { jobsPaid: number; medianSecondsToPaid: number | null; benchRight: number; benchTotal: number };
 export type LedgerRow = Pick<Job, "id" | "title" | "createdAt" | "seeded"> & {
   state: MoneyState;
+  /** What the client agreed to pay and PayPal held. */
+  price: string;
+  /** The held price, or what was taken from the hold once it's paid. */
   amount: string;
   verdict: DeliveryOutcome | "none";
   secondsToPaid: number | null;

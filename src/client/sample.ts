@@ -46,5 +46,5 @@ export const SAMPLE_JOB: Job = {
 };
 
 export const SAMPLE_LEDGER: LedgerRow[] = [
-  { id: "job_sample", title: EXAMPLE.title, createdAt: SAMPLE_JOB.createdAt, seeded: false, state: "paid", amount: "150.00", verdict: "passed", secondsToPaid: 11.2, authorizationId: "0VF52814937998046", captureId: "3C679366HH908993F", payoutBatchId: "5UXD2E8A7EBQJ" },
+  { id: "job_sample", title: EXAMPLE.title, createdAt: SAMPLE_JOB.createdAt, seeded: false, state: "paid", price: "150.00", amount: "150.00", verdict: "passed", secondsToPaid: 11.2, authorizationId: "0VF52814937998046", captureId: "3C679366HH908993F", payoutBatchId: "5UXD2E8A7EBQJ" },
 ];
