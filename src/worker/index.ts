@@ -30,7 +30,7 @@ const app = new Hono<{ Bindings: Env }>().basePath("/api");
 const fail = (c: C, status: 400 | 404 | 409 | 413 | 429 | 502, error: string, code?: ApiError["code"]) => c.json<ApiError>({ error, code }, status);
 const now = () => new Date().toISOString();
 const newId = (p: string) => `${p}_${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
-const perDay = (c: C) => Number(c.env.DAILY_CHECKS) || 40;
+const perDay = (c: C) => Number(c.env.DAILY_CHECKS) || 200;
 const money = (v: unknown) => (typeof v === "string" || typeof v === "number") && /^\d{1,5}(\.\d{1,2})?$/.test(String(v)) && Number(v) >= 1 ? Number(v).toFixed(2) : null;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

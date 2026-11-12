@@ -93,7 +93,7 @@ Seeded: the example brief and its two sample deliveries; six finished jobs in th
 4. Deliver "A draft that falls short": the money stays held, and you see what's missing.
 5. Deliver "The finished work": every check passes, and the freelancer is paid.
 
-It takes under a minute. You can also write your own brief and deliver your own work. The live site allows 40 checks a day, to keep it open to everyone.
+It takes under a minute. You can also write your own brief and deliver your own work. The live site allows 200 checks a day, to keep it open to everyone.
 
 ## Run it yourself
 
