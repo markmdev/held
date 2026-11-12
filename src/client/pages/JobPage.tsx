@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { cancel, deliver, fileToBase64, HeldError, release, useConfig, useJob } from "../api";
+import { cancel, clientKey, deliver, fileToBase64, HeldError, release, useConfig, useJob } from "../api";
 import { ActionPanel, DeliveryCard, ShareLink, type Busy, type DeliverInput } from "../components/job";
 import { Receipt, Timeline } from "../components/receipt";
 import { PayPalHold } from "../components/PayPalHold";
@@ -112,6 +112,7 @@ export function JobPage({ id }: { id: string }) {
           )}
           <ActionPanel
             job={view}
+            client={!!clientKey(job.id)}
             hold={<PayPalHold job={job} onHeld={onHeld} />}
             actions={{
               deliver: (input) => void send(input),

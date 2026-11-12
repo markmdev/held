@@ -9,8 +9,8 @@ export class HeldError extends Error {
   }
 }
 
-async function api<T>(path: string, body?: unknown): Promise<T> {
-  const res = await fetch(`/api${path}`, body === undefined ? undefined : { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+async function api<T>(path: string, body?: unknown, headers?: Record<string, string>): Promise<T> {
+  const res = await fetch(`/api${path}`, body === undefined ? undefined : { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
   const data = await res.json().catch(() => ({ error: "The server didn't answer. Try again." }));
   if (!res.ok) throw new HeldError((data as ApiError).error, (data as ApiError).code);
   return data as T;
@@ -44,12 +44,22 @@ export const useResults = () => useLoad<BenchResult>("/results");
 export const useJob = (id: string) => useLoad<Job>(`/jobs/${id}`, jobPoll);
 
 export const makeChecks = (brief: string) => api<{ title: string; checks: Check[] }>("/checks", { brief });
-export const createJob = (j: { title: string; brief: string; amount: string; freelancerEmail: string; checks: Check[] }) => api<{ id: string }>("/jobs", j);
+// The client's key stays in the browser that made the job. The job's link doesn't carry it, so the freelancer
+// can't release or cancel the money.
+const keyName = (id: string) => `held.client.${id}`;
+export const clientKey = (id: string) => localStorage.getItem(keyName(id));
+const asClient = (id: string) => ({ "x-client-key": clientKey(id) ?? "" });
+
+export async function createJob(j: { title: string; brief: string; amount: string; freelancerEmail: string; checks: Check[] }) {
+  const made = await api<{ id: string; clientKey: string }>("/jobs", j);
+  localStorage.setItem(keyName(made.id), made.clientKey);
+  return made;
+}
 export const createOrder = (id: string) => api<{ orderId: string }>(`/jobs/${id}/order`, {});
 export const authorize = (id: string) => api<Job>(`/jobs/${id}/authorize`, {});
 export const deliver = (id: string, d: { text?: string; link?: string; file?: { name: string; type: string; base64: string } }) => api<Job>(`/jobs/${id}/deliveries`, d);
-export const release = (id: string, amount?: string) => api<Job>(`/jobs/${id}/release`, amount ? { amount } : {});
-export const cancel = (id: string) => api<Job>(`/jobs/${id}/cancel`, {});
+export const release = (id: string, amount?: string) => api<Job>(`/jobs/${id}/release`, amount ? { amount } : {}, asClient(id));
+export const cancel = (id: string) => api<Job>(`/jobs/${id}/cancel`, {}, asClient(id));
 
 export function fileToBase64(file: File): Promise<string> {
   return new Promise((ok, bad) => {

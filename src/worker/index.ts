@@ -10,6 +10,7 @@ import { settle } from "./verdict";
 import { readDelivery, type Incoming } from "./delivery";
 import type { AgLlmRequest } from "ag-studio";
 import { agentTurn } from "./agent";
+import { isClient, newClientKey } from "./client";
 
 type Env = {
   DB: D1Database;
@@ -28,12 +29,13 @@ type C = Context<{ Bindings: Env }>;
 
 const app = new Hono<{ Bindings: Env }>().basePath("/api");
 
-const fail = (c: C, status: 400 | 404 | 409 | 413 | 429 | 502, error: string, code?: ApiError["code"]) => c.json<ApiError>({ error, code }, status);
+const fail = (c: C, status: 400 | 403 | 404 | 409 | 413 | 429 | 502, error: string, code?: ApiError["code"]) => c.json<ApiError>({ error, code }, status);
 const now = () => new Date().toISOString();
 const newId = (p: string) => `${p}_${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
 const perDay = (c: C) => Number(c.env.DAILY_CHECKS) || 200;
 const money = (v: unknown) => (typeof v === "string" || typeof v === "number") && /^\d{1,5}(\.\d{1,2})?$/.test(String(v)) && Number(v) >= 1 ? Number(v).toFixed(2) : null;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const SAMPLE_JOB = "This sample job stays as it is. Try one of your own.";
 
 app.onError((err, c) => {
   console.error(err);
@@ -97,10 +99,11 @@ app.post("/jobs", async (c) => {
     });
   if (checks.length < 1) return fail(c, 400, "Add at least one check.", "bad_request");
   const id = newId("job");
-  await c.env.DB.prepare("INSERT INTO jobs (id, title, brief, amount, freelancer_email, checks_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-    .bind(id, b.title.trim().slice(0, 80), b.brief.trim().slice(0, 4000), amount, b.freelancerEmail.trim(), JSON.stringify(checks), now())
+  const client = await newClientKey();
+  await c.env.DB.prepare("INSERT INTO jobs (id, title, brief, amount, freelancer_email, checks_json, created_at, client_key_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+    .bind(id, b.title.trim().slice(0, 80), b.brief.trim().slice(0, 4000), amount, b.freelancerEmail.trim(), JSON.stringify(checks), now(), client.hash)
     .run();
-  return c.json({ id });
+  return c.json({ id, clientKey: client.key });
 });
 
 app.get("/jobs/:id", async (c) => {
@@ -137,6 +140,7 @@ app.post("/jobs/:id/authorize", async (c) => {
 app.post("/jobs/:id/deliveries", async (c) => {
   const row = await getJobRow(c.env.DB, c.req.param("id"));
   if (!row) return fail(c, 404, "No job at this link.", "not_found");
+  if (row.seeded) return fail(c, 403, SAMPLE_JOB);
   if (row.money_state !== "held") return fail(c, 409, row.money_state === "awaiting_hold" ? "The client hasn't held the money yet." : "This job is closed.");
   let delivery;
   try {
@@ -194,9 +198,14 @@ async function release(env: Env, row: Awaited<ReturnType<typeof getJobRow>> & {}
   await updateJob(env.DB, row.id, { payout_batch_id: p.batchId, payout_status: p.status });
 }
 
+// Releasing by hand and cancelling are the client's alone: they need the key the job's maker was given.
+// The seeded jobs in the ledger have no client, so nobody can move their money.
+const notClient = (c: C, row: { seeded: number }) => fail(c, 403, row.seeded ? SAMPLE_JOB : "Only the client can do this, from the browser where the job was made.");
+
 app.post("/jobs/:id/release", async (c) => {
   const row = await getJobRow(c.env.DB, c.req.param("id"));
   if (!row) return fail(c, 404, "No job at this link.", "not_found");
+  if (!(await isClient(row.client_key_hash, c.req.header("x-client-key")))) return notClient(c, row);
   if (row.money_state !== "held") return fail(c, 409, "There's no held money to release.");
   const { amount: raw } = (await c.req.json().catch(() => ({}))) as { amount?: unknown };
   const amount = raw === undefined || raw === null || raw === "" ? null : money(raw);
@@ -208,6 +217,7 @@ app.post("/jobs/:id/release", async (c) => {
 app.post("/jobs/:id/cancel", async (c) => {
   const row = await getJobRow(c.env.DB, c.req.param("id"));
   if (!row) return fail(c, 404, "No job at this link.", "not_found");
+  if (!(await isClient(row.client_key_hash, c.req.header("x-client-key")))) return notClient(c, row);
   if (row.money_state !== "held") return fail(c, 409, "There's no held money to cancel.");
   await paypal.voidHold(c.env, row.authorization_id!);
   await updateJob(c.env.DB, row.id, { money_state: "cancelled", cancelled_at: now() });

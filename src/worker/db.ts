@@ -5,7 +5,7 @@ export type JobRow = {
   id: string; title: string; brief: string; amount: string; freelancer_email: string; checks_json: string; created_at: string; seeded: number;
   money_state: MoneyState; captured_amount: string | null; order_id: string | null; authorization_id: string | null; capture_id: string | null;
   payout_batch_id: string | null; payout_status: string | null; payout_done_at: string | null; held_at: string | null; paid_at: string | null; cancelled_at: string | null;
-  hold_expires_at: string | null;
+  hold_expires_at: string | null; client_key_hash: string | null;
 };
 type DeliveryRow = {
   id: string; job_id: string; at: string; label: string; excerpt: string; outcome: Delivery["outcome"];

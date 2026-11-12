@@ -152,7 +152,7 @@ function Deliver({ job, actions }: { job: Job; actions: JobActions }) {
   );
 }
 
-export function ActionPanel({ job, actions, hold }: { job: Job; actions: JobActions; hold: ReactNode }) {
+export function ActionPanel({ job, actions, hold, client }: { job: Job; actions: JobActions; hold: ReactNode; client: boolean }) {
   const [part, setPart] = useState("");
   const st = job.money.state;
   const last = job.deliveries.at(-1);
@@ -182,6 +182,17 @@ export function ActionPanel({ job, actions, hold }: { job: Job; actions: JobActi
       </section>
     );
 
+  if (job.seeded)
+    return (
+      <section className="card p-5 text-[15px] text-ink-2">
+        <div className="label">Kept as it is</div>
+        <p className="mt-2">This sample job stays as it is, with its money held after a delivery that fell short. Try one of your own to deliver work and see it paid.</p>
+        <Link href="/new?example=1" className="btn btn-quiet mt-4 w-full">
+          Try a sample job
+        </Link>
+      </section>
+    );
+
   const error = actions.error && <p className="rounded-[3px] bg-fail-bg px-3.5 py-3 text-[14px] text-fail">{actions.error}</p>;
   const freelancer = (
     <Side who="Freelancer" title="Deliver the work">
@@ -197,6 +208,19 @@ export function ActionPanel({ job, actions, hold }: { job: Job; actions: JobActi
           {hold}
         </Side>
         {freelancer}
+        {error}
+      </div>
+    );
+
+  if (!client)
+    return (
+      <div className="flex flex-col gap-4">
+        {freelancer}
+        <Side who="Client" title={disagreed ? "The checks disagree: the client decides" : "The client's call"}>
+          <p className="text-[14.5px] leading-relaxed text-ink-2">
+            Only the client can release the money or cancel the hold, from the browser where the job was made.
+          </p>
+        </Side>
         {error}
       </div>
     );
@@ -239,7 +263,7 @@ export function ActionPanel({ job, actions, hold }: { job: Job; actions: JobActi
           </button>
         </div>
         <p className="mt-3 text-[12.5px] leading-relaxed text-ink-3">
-          Releasing pays the freelancer now, whatever the checks say. Cancelling gives up the hold, so the money stays with you.
+          Releasing pays the freelancer now, whatever the checks say. Cancelling gives up the hold, so the money stays with you. Only this browser, where the job was made, has these buttons.
         </p>
       </Side>
       {error}
