@@ -67,17 +67,17 @@ Every call uses structured output, so a verdict is always one of pass or fail wi
 
 ## Technological Implementation
 
-The money moves through PayPal's Orders, Payments and Payouts APIs: an authorization holds the client's money, a capture takes all or part of it, a void cancels it, and a payout sends what was taken to the freelancer. Claude turns the brief into checks and checks every delivery twice, with code counting what can be counted and refusing any pass without a quote. The test set of 40 cases runs through the same code the live site uses, with one command, and the faults its harder cases found are fixed with their tests in the repo.
+The money moves through PayPal's Orders, Payments and Payouts APIs: an authorization holds the client's money, a capture takes all or part of it, a void cancels it, and a payout sends what was taken to the freelancer. Claude turns the brief into checks and checks every delivery twice, with code counting what can be counted and refusing any pass without a quote. The test set of 40 cases runs through the same code the live site uses, with one command, and the faults its harder cases found are fixed with their tests in the repo. Only the client can release or cancel by hand: the job's maker gets a key that stays in their browser, and the server keeps only its hash.
 
 Built with React, TypeScript and Tailwind CSS, on one Cloudflare Worker (Hono for the API, D1 for the database), with the ledger in AG Studio.
 
 ## Design
 
-Both sides share one page per job, from the brief to the payment. Every state of the money (held, paid, part paid, cancelled) is on screen with PayPal's own IDs, and each check shows the words from the delivery behind its verdict. The ledger is an AG Studio dashboard in Held's own theme.
+Both sides share one page per job, from the brief to the payment, and each sees their own side: the buttons that release or cancel the money appear only for the client. Every state of the money (held, paid, part paid, cancelled) is on screen with PayPal's own IDs, and each check shows the words from the delivery behind its verdict. The ledger is an AG Studio dashboard in Held's own theme.
 
 ## Potential Impact
 
-Freelancers wait because payment waits for the client to say the work is done, and that sign-off is where the weeks go. Half of the 5,358 freelancers in the Freelancers Union's 2015 survey had trouble getting paid in 2014, losing $5,968 on average that year, and the longest wait averaged 98 days. Held takes the sign-off away: both sides agree what "done" means before the money is set aside, the freelancer is paid seconds after the work passes, and the client never pays for work that misses the brief. It runs on PayPal alone, so there's no marketplace taking a cut on top of PayPal's usual fees.
+Freelancers wait because payment waits for the client to say the work is done, and that sign-off is where the weeks go. Half of the 5,358 freelancers in the Freelancers Union's 2015 survey had trouble getting paid in 2014, losing $5,968 on average that year, and the longest wait averaged 98 days. Held takes the sign-off away: both sides agree what "done" means before the money is set aside, the freelancer is paid seconds after the work passes, and the client never pays for work that misses the brief. A client who means to pay gives nothing up by holding: the money isn't taken until the work passes, and it stays theirs if they cancel or the hold runs out. It runs on PayPal alone, so there's no marketplace taking a cut on top of PayPal's usual fees.
 
 ## Innovation/Idea
 

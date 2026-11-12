@@ -117,16 +117,16 @@ function shortName(title: string, letters: number) {
 }
 
 export function ledgerData(rows: LedgerRow[]): AgDataSourcesDefinition {
-  // Charts group by their category, so each job's label must be its own: jobs with the same title share a short name and get a number.
+  // Charts group by their category, so each job's label must be its own: jobs whose titles shorten to the same name get a number.
   // Jobs all started on one day are told apart by the time alone.
   const startedAs = new Set(rows.map((r) => new Date(r.createdAt).toDateString())).size > 1 ? stamp : clock;
   const copies = new Map<string, number>();
   for (const r of rows) copies.set(r.title, (copies.get(r.title) ?? 0) + 1);
   const seen = new Map<string, number>();
   const labels = [...rows].reverse().map((r) => {
-    const n = (seen.get(r.title) ?? 0) + 1;
-    seen.set(r.title, n);
     const name = shortName(r.title, copies.get(r.title)! > 1 ? AXIS_LETTERS - 4 : AXIS_LETTERS);
+    const n = (seen.get(name) ?? 0) + 1;
+    seen.set(name, n);
     return n > 1 ? `${name} (${n})` : name;
   }).reverse();
   const jobs = rows.map((r, i) => {
