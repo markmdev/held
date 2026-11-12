@@ -1,0 +1,35 @@
+{
+  "name": "held",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc -b && vite build",
+    "deploy": "npm run build && wrangler deploy",
+    "db:migrate": "wrangler d1 migrations apply held --remote",
+    "db:migrate:local": "wrangler d1 migrations apply held --local",
+    "bench": "node --experimental-strip-types bench/run.ts"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "ag-grid-community": "36.2.0",
+    "ag-grid-react": "36.2.0",
+    "ag-studio": "3.0.0",
+    "ag-studio-react": "3.0.0",
+    "hono": "^4.13.18",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwindcss": "^4.3.5",
+    "wouter": "^3.13.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.69.1",
+    "@cloudflare/workers-types": "^5.20261112.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "wrangler": "^4.160.1"
+  }
+}

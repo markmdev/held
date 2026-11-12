@@ -1,0 +1,82 @@
+export type CheckKind = "measured" | "judged";
+
+// What code measures for a "measured" check. Items are the delivery's pieces: blank-line or numbered blocks.
+export type Measure =
+  | { type: "item_count"; min: number; max: number }
+  | { type: "words_per_item"; min: number; max: number }
+  | { type: "total_words"; min: number; max: number }
+  | { type: "each_item_contains"; phrase: string }
+  | { type: "none_contains"; phrase: string };
+
+export type Check = { id: string; text: string; kind: CheckKind; measure?: Measure };
+
+export type MoneyState = "awaiting_hold" | "held" | "paid" | "part_paid" | "cancelled";
+export type Money = {
+  state: MoneyState;
+  amount: string;
+  capturedAmount?: string;
+  orderId?: string;
+  authorizationId?: string;
+  captureId?: string;
+  payoutBatchId?: string;
+  payoutStatus?: string;
+  heldAt?: string;
+  paidAt?: string;
+  cancelledAt?: string;
+};
+
+export type Verdict = { checkId: string; pass: boolean; quote: string; reason: string };
+export type DeliveryOutcome = "checking" | "passed" | "failed" | "disagreed";
+export type Delivery = {
+  id: string;
+  at: string;
+  label: string;
+  excerpt: string;
+  outcome: DeliveryOutcome;
+  first: Verdict[];
+  second: Verdict[] | null;
+  missing: string[];
+  secondsToPaid: number | null;
+};
+
+export type Job = {
+  id: string;
+  title: string;
+  brief: string;
+  freelancerEmail: string;
+  createdAt: string;
+  seeded: boolean;
+  checks: Check[];
+  money: Money;
+  deliveries: Delivery[];
+};
+
+export type Stats = { jobsPaid: number; medianSecondsToPaid: number | null; benchRight: number; benchTotal: number };
+export type LedgerRow = Pick<Job, "id" | "title" | "createdAt" | "seeded"> & {
+  state: MoneyState;
+  amount: string;
+  verdict: DeliveryOutcome | "none";
+  secondsToPaid: number | null;
+  authorizationId?: string;
+  captureId?: string;
+  payoutBatchId?: string;
+};
+export type BenchCase = {
+  id: string;
+  brief: string;
+  deliveryExcerpt: string;
+  expected: "pass" | "fail";
+  got: "pass" | "fail" | null;
+  right: boolean | null;
+  heldOut: boolean;
+  injection: boolean;
+};
+export type BenchResult = {
+  ranAt: string | null;
+  cases: BenchCase[];
+  tuning: { right: number; total: number };
+  heldOut: { right: number; total: number };
+};
+
+export type DailyLeft = { checksLeft: number; checksPerDay: number };
+export type ApiError = { error: string; code?: "daily_limit" | "bad_request" | "paypal" | "claude" | "not_found" };
