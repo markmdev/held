@@ -226,10 +226,10 @@ function places(jobs: number) {
     "median-secs": at(0, 6, 12, 6),
     jobs: at(12, 6, 12, 6),
     grid: at(0, 12, 24, grid),
-    proof: at(0, 12 + grid, 24, 40),
-    "money-by-job": at(0, 52 + grid, 24, 18),
-    "seconds-to-paid": at(0, 70 + grid, 24, 16),
-    verdicts: at(0, 86 + grid, 24, 14),
+    proof: at(0, 12 + grid, 24, 44),
+    "money-by-job": at(0, 56 + grid, 24, 18),
+    "seconds-to-paid": at(0, 74 + grid, 24, 16),
+    verdicts: at(0, 90 + grid, 24, 14),
   };
   return { laptop, phone };
 }
