@@ -43,6 +43,9 @@ export type Delivery = {
   second: Verdict[] | null;
   missing: string[];
   secondsToPaid: number | null;
+  /** When the first check finished, and the second if it ran. Deliveries from before 12 November 16:00 have neither. */
+  firstCheckedAt?: string;
+  secondCheckedAt?: string;
 };
 
 export type Job = {
@@ -83,12 +86,19 @@ export type BenchCase = {
   right: boolean | null;
   heldOut: boolean;
   injection: boolean;
+  /** One of the harder cases: written after the checker was finished and run once. */
+  hard?: boolean;
+  /** How the work was delivered; pasted text when absent. */
+  kind?: "text" | "pdf" | "image" | "link";
+  /** What the case tests. */
+  why?: string;
 };
 export type BenchResult = {
   ranAt: string | null;
   cases: BenchCase[];
   tuning: { right: number; total: number };
   heldOut: { right: number; total: number };
+  hard: { right: number; total: number };
 };
 
 export type DailyLeft = { checksLeft: number; checksPerDay: number };

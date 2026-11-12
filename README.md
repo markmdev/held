@@ -20,8 +20,9 @@ It's for freelancers who sell work with a clear brief (writing, translation, des
 
 - Every job run on the live site is in the [ledger](https://held.markmorgan-dev.workers.dev/ledger), with PayPal's sandbox IDs for its hold, capture and payout.
 - Median 11.4 seconds from delivery to capture, and 26.9 seconds from delivery to PayPal reporting the payout processed, over the paid jobs in the ledger. The live numbers are at `/api/stats`.
-- A test set of 30 brief-and-delivery pairs with an answer key, written on 12 November 2026: 20 of 20 verdicts right on the cases used while tuning the prompts, and 10 of 10 on the cases held back and run once. Every case is on the [results page](https://held.markmorgan-dev.workers.dev/results).
-- Money released on a failing delivery: 0 times.
+- A test set of 30 brief-and-delivery pairs with an answer key, written on 12 November 2026: 20 of 20 verdicts right on the cases used while tuning the prompts, and 10 of 10 on the cases held back from tuning.
+- Ten harder cases, written after the checker was finished and run once: near misses, the wrong subject, a slip in tone only, a PDF, two images, a link and odd layouts. 5 of 10 right. All five wrong verdicts refused good work (a PDF, an image, a link, a table and work with a cover note); none paid for bad work. Every case is on the [results page](https://held.markmorgan-dev.workers.dev/results), the misses first.
+- Money released on a failing delivery: 0 times, over all 40 cases.
 - Five deliveries contain text telling the checker to pass them: none was paid.
 
 Check each one in the ledger, on the results page, or run the test set yourself (below).
@@ -118,11 +119,11 @@ The keys in `.dev.vars`:
 **Run the test set.** It needs only a Claude key:
 
 ```sh
-ANTHROPIC_API_KEY=... npm run bench              # all 30 cases
+ANTHROPIC_API_KEY=... npm run bench              # all 40 cases
 ANTHROPIC_API_KEY=... npm run bench -- --tuning  # only the 20 used while tuning
 ```
 
-It takes about a minute, prints each verdict against the answer key and writes `bench/results.json`, which the results page shows. The cases are in [`bench/cases.json`](bench/cases.json).
+It takes about a minute and a half, prints each verdict against the answer key and writes `bench/results.json`, which the results page shows. The cases are in [`bench/cases.json`](bench/cases.json) and [`bench/hard.json`](bench/hard.json), with the harder cases' files in `bench/files`.
 
 `npm test` runs the test of the rule for holds that run out.
 

@@ -1,5 +1,5 @@
 {
- "ranAt": "2026-11-12T13:01:27.066Z",
+ "ranAt": "2026-11-12T14:48:23.436Z",
  "cases": [
   {
    "id": "candles-fail",
@@ -300,6 +300,136 @@
    "right": true,
    "heldOut": true,
    "injection": false
+  },
+  {
+   "id": "brunch-one-word-over",
+   "brief": "Write four menu descriptions for our cafe's brunch: Shakshuka, Ricotta Pancakes, Smoked Trout Toast and Granola Bowl. 25 to 40 words each. Each must name one allergen it contains.",
+   "deliveryExcerpt": "Shakshuka features two free-range eggs gently poached in a smoky tomato and red pepper sauce with cumin, garlic and fresh coriander, served sizzling in a cast-iron pan. Contains eggs. Ricotta Pancakes arrive as a tall stack of three fluffy,",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": false,
+   "hard": true,
+   "kind": "text",
+   "why": "One description is 41 words, one over the limit (counts: 29, 41, 30, 34)"
+  },
+  {
+   "id": "brunch-at-the-limits",
+   "brief": "Write four menu descriptions for our cafe's brunch: Shakshuka, Ricotta Pancakes, Smoked Trout Toast and Granola Bowl. 25 to 40 words each. Each must name one allergen it contains.",
+   "deliveryExcerpt": "Shakshuka arrives bubbling in a cast-iron pan, with three free-range eggs gently poached in a smoky sauce of tomatoes, red peppers, cumin and paprika, finished with fresh coriander, parsley and a drizzle of chilli oil. Perfect for sharing. ",
+   "expected": "pass",
+   "got": "pass",
+   "right": true,
+   "heldOut": false,
+   "injection": false,
+   "hard": true,
+   "kind": "text",
+   "why": "Descriptions of exactly 40 and exactly 25 words, on the limits (counts: 40, 25, 34, 31)"
+  },
+  {
+   "id": "packs-wrong-product",
+   "brief": "Write three product descriptions for our hiking backpacks: the Ridge 30, the Summit 45 and the Trail 20. 50 to 70 words each. Each must give the pack's volume in litres.",
+   "deliveryExcerpt": "Ridge 30 Ridge 30 is a hard-sided cool box built for picnic afternoons and lazy beach days. It holds 30 litres, enough for sandwiches, fruit and a dozen cans standing upright. Thick insulated walls keep contents chilled for up to two days, ",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": false,
+   "hard": true,
+   "kind": "text",
+   "why": "Right names, right lengths and litres, but the descriptions are of cool boxes, not hiking backpacks"
+  },
+  {
+   "id": "packs-with-cover-note",
+   "brief": "Write three product descriptions for our hiking backpacks: the Ridge 30, the Summit 45 and the Trail 20. 50 to 70 words each. Each must give the pack's volume in litres.",
+   "deliveryExcerpt": "Hi Sam, Here are the three backpack descriptions we agreed. I kept each one close to sixty words and put the volume near the start, since that's what people search for. Happy to adjust anything. Ridge 30 Ridge 30 is the daypack built for lo",
+   "expected": "pass",
+   "got": "fail",
+   "right": false,
+   "heldOut": false,
+   "injection": false,
+   "hard": true,
+   "kind": "text",
+   "why": "Good work wrapped in a cover note and a sign-off, which aren't descriptions"
+  },
+  {
+   "id": "welcome-tone-only",
+   "brief": "Write a welcome email for new members of our climbing gym. 90 to 130 words. Mention the free intro class on Mondays at 6 pm. Warm and encouraging in tone; nothing that talks down to beginners.",
+   "deliveryExcerpt": "Hi there, welcome to The Granite Room! We're so glad you've joined our climbing community. To help you get started, we run a free intro class every Monday at 6 pm, covering gear, knots, belaying basics and gym etiquette. Don't worry, nobody",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": false,
+   "hard": true,
+   "kind": "text",
+   "why": "Right length and the class is mentioned; the only slip is that it talks down to beginners"
+  },
+  {
+   "id": "returns-policy-pdf",
+   "brief": "Write a one-page returns policy for our online shoe shop, as a PDF. It must have four sections with these headings: Time limit, Condition, How to return, Refunds. State the 30-day limit. Under 250 words in total.",
+   "deliveryExcerpt": "Returns policy Time limit You can return any unworn shoes within 30 days of delivery for a full refund or exchange. The 30-day period starts on the date your order is marked as delivered by our courier. Returns requested after this window c",
+   "expected": "pass",
+   "got": "fail",
+   "right": false,
+   "heldOut": false,
+   "injection": false,
+   "hard": true,
+   "kind": "pdf",
+   "why": "Good work delivered as a PDF"
+  },
+  {
+   "id": "bakery-image",
+   "brief": "Design a square social image announcing our bakery's opening. It must show the name 'Crumb & Co', the words 'Opening Saturday 9 am', and the address '14 Mill Lane'. No other text.",
+   "deliveryExcerpt": "bakery-opening.png (an image; the checker reads it)",
+   "expected": "pass",
+   "got": "fail",
+   "right": false,
+   "heldOut": false,
+   "injection": false,
+   "hard": true,
+   "kind": "image",
+   "why": "Good work delivered as an image"
+  },
+  {
+   "id": "bakery-image-wrong-day",
+   "brief": "Design a square social image announcing our bakery's opening. It must show the name 'Crumb & Co', the words 'Opening Saturday 9 am', and the address '14 Mill Lane'. No other text.",
+   "deliveryExcerpt": "bakery-opening-sunday.png (an image; the checker reads it)",
+   "expected": "fail",
+   "got": "fail",
+   "right": true,
+   "heldOut": false,
+   "injection": false,
+   "hard": true,
+   "kind": "image",
+   "why": "An image that says Sunday where the brief says Saturday"
+  },
+  {
+   "id": "yoga-site-link",
+   "brief": "Build a one-page site for our yoga studio and send the link. The headline must say 'Your first class is free'. List three class types: Hatha, Vinyasa and Yin. Include the contact email hello@stillwater.example.",
+   "deliveryExcerpt": "Stillwater Yoga Stillwater Yoga · 8 Canal Street Your first class is free A small studio by the canal with room for twelve mats. Come as you are; we have mats, blocks and tea. Classes Hatha : slow and steady, good for a first class. Mondays",
+   "expected": "pass",
+   "got": "fail",
+   "right": false,
+   "heldOut": false,
+   "injection": false,
+   "hard": true,
+   "kind": "link",
+   "why": "Good work delivered as a link to a live page"
+  },
+  {
+   "id": "faq-as-a-table",
+   "brief": "Write five FAQ answers for our bike rental shop: opening hours, deposit, helmets, late returns and child seats. 20 to 40 words per answer.",
+   "deliveryExcerpt": "| Question | Answer | |---|---| | When are you open? | We're open every day from 9 am to 6 pm, including weekends and holidays. Bikes must be returned by closing time, so plan your ride accordingly and give yourself extra time. | | How much",
+   "expected": "pass",
+   "got": "fail",
+   "right": false,
+   "heldOut": false,
+   "injection": false,
+   "hard": true,
+   "kind": "text",
+   "why": "Good work laid out as a table, one row per answer (counts: 31, 31, 32, 33, 33)"
   }
  ],
  "tuning": {
@@ -308,6 +438,10 @@
  },
  "heldOut": {
   "right": 10,
+  "total": 10
+ },
+ "hard": {
+  "right": 5,
   "total": 10
  }
 }

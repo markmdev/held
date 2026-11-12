@@ -10,6 +10,7 @@ export type JobRow = {
 type DeliveryRow = {
   id: string; job_id: string; at: string; label: string; excerpt: string; outcome: Delivery["outcome"];
   first_json: string; second_json: string | null; missing_json: string; seconds_to_paid: number | null;
+  first_checked_at: string | null; second_checked_at: string | null;
 };
 
 const opt = <T>(v: T | null) => (v === null ? undefined : v);
@@ -28,6 +29,7 @@ export function toJob(r: JobRow, ds: DeliveryRow[]): Job {
       id: d.id, at: d.at, label: d.label, excerpt: d.excerpt, outcome: d.outcome,
       first: JSON.parse(d.first_json) as Verdict[], second: d.second_json ? (JSON.parse(d.second_json) as Verdict[]) : null,
       missing: JSON.parse(d.missing_json) as string[], secondsToPaid: d.seconds_to_paid,
+      firstCheckedAt: opt(d.first_checked_at), secondCheckedAt: opt(d.second_checked_at),
     })),
   };
 }

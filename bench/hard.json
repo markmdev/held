@@ -1,0 +1,389 @@
+[
+ {
+  "id": "brunch-one-word-over",
+  "brief": "Write four menu descriptions for our cafe's brunch: Shakshuka, Ricotta Pancakes, Smoked Trout Toast and Granola Bowl. 25 to 40 words each. Each must name one allergen it contains.",
+  "expected": "fail",
+  "why": "One description is 41 words, one over the limit (counts: 29, 41, 30, 34)",
+  "delivery": "Shakshuka features two free-range eggs gently poached in a smoky tomato and red pepper sauce with cumin, garlic and fresh coriander, served sizzling in a cast-iron pan. Contains eggs.\n\nRicotta Pancakes arrive as a tall stack of three fluffy, golden cakes, crowned with whipped honey butter, fresh blueberries and a dusting of lemon zest. Served with warm maple syrup on the side. Contains milk; please ask staff about other allergens.\n\nSmoked Trout Toast layers flaked house-smoked trout over whipped dill cream cheese on toasted sourdough, finished with pickled red onion, capers, lemon zest and peppery watercress. Allergen note: contains fish.\n\nGranola Bowl brings together house-baked honey oat granola, thick Greek yogurt, seasonal berries, sliced banana and a drizzle of local wildflower honey, finished with toasted almonds for crunch. Contains nuts; ask staff about swaps.",
+  "checks": [
+   {
+    "id": "c1",
+    "text": "4 descriptions",
+    "kind": "measured",
+    "measure": {
+     "type": "item_count",
+     "min": 4,
+     "max": 4
+    }
+   },
+   {
+    "id": "c2",
+    "text": "One each for Shakshuka, Ricotta Pancakes, Smoked Trout Toast and Granola Bowl",
+    "kind": "judged"
+   },
+   {
+    "id": "c3",
+    "text": "25 to 40 words each",
+    "kind": "measured",
+    "measure": {
+     "type": "words_per_item",
+     "min": 25,
+     "max": 40
+    }
+   },
+   {
+    "id": "c4",
+    "text": "Each names one allergen it contains",
+    "kind": "judged"
+   }
+  ],
+  "heldOut": false,
+  "injection": false
+ },
+ {
+  "id": "brunch-at-the-limits",
+  "brief": "Write four menu descriptions for our cafe's brunch: Shakshuka, Ricotta Pancakes, Smoked Trout Toast and Granola Bowl. 25 to 40 words each. Each must name one allergen it contains.",
+  "expected": "pass",
+  "why": "Descriptions of exactly 40 and exactly 25 words, on the limits (counts: 40, 25, 34, 31)",
+  "delivery": "Shakshuka arrives bubbling in a cast-iron pan, with three free-range eggs gently poached in a smoky sauce of tomatoes, red peppers, cumin and paprika, finished with fresh coriander, parsley and a drizzle of chilli oil. Perfect for sharing. Contains eggs.\n\nRicotta Pancakes arrive fluffy and golden, stacked three high with whipped lemon butter, warm blueberry compote and a generous pour of maple syrup. Contains milk.\n\nSmoked Trout Toast layers flaky hot-smoked trout over whipped dill cream cheese on toasted sourdough, finished with pickled red onion, capers, lemon zest and peppery watercress. Contains fish; ask your server about other allergens.\n\nGranola Bowl brings house-baked oat and almond granola over thick Greek yogurt, finished with seasonal berries, sliced banana, and a drizzle of local wildflower honey. Light, crunchy, and satisfying. Contains nuts.",
+  "checks": [
+   {
+    "id": "c1",
+    "text": "4 descriptions",
+    "kind": "measured",
+    "measure": {
+     "type": "item_count",
+     "min": 4,
+     "max": 4
+    }
+   },
+   {
+    "id": "c2",
+    "text": "One each for Shakshuka, Ricotta Pancakes, Smoked Trout Toast and Granola Bowl",
+    "kind": "judged"
+   },
+   {
+    "id": "c3",
+    "text": "25 to 40 words each",
+    "kind": "measured",
+    "measure": {
+     "type": "words_per_item",
+     "min": 25,
+     "max": 40
+    }
+   },
+   {
+    "id": "c4",
+    "text": "Each names one allergen it contains",
+    "kind": "judged"
+   }
+  ],
+  "heldOut": false,
+  "injection": false
+ },
+ {
+  "id": "packs-wrong-product",
+  "brief": "Write three product descriptions for our hiking backpacks: the Ridge 30, the Summit 45 and the Trail 20. 50 to 70 words each. Each must give the pack's volume in litres.",
+  "expected": "fail",
+  "why": "Right names, right lengths and litres, but the descriptions are of cool boxes, not hiking backpacks",
+  "delivery": "Ridge 30\nRidge 30 is a hard-sided cool box built for picnic afternoons and lazy beach days. It holds 30 litres, enough for sandwiches, fruit and a dozen cans standing upright. Thick insulated walls keep contents chilled for up to two days, while a tight gasket lid seals out warm air. Sturdy side handles make loading the car easy, and the lid doubles as a table.\n\nSummit 45\nSummit 45 keeps your picnic cold from morning until the last sandwich is gone. Its hard-sided shell and thick insulated walls hold ice for up to three days, while 45 litres of space fits drinks, fruit and full meals for the whole family. Sturdy side handles, a lockable lid and a built-in bottle opener make every outing in the park easier.\n\nTrail 20\nTrail 20 keeps your picnic fresh from the first sandwich to the last cold drink. This hard-sided cool box holds 20 litres, enough for lunch for four plus a few bottles standing upright. Thick insulated walls and a tight-sealing lid hold ice for up to two days, while sturdy fold-down handles make it easy to lift into the car boot.",
+  "checks": [
+   {
+    "id": "c1",
+    "text": "3 descriptions",
+    "kind": "measured",
+    "measure": {
+     "type": "item_count",
+     "min": 3,
+     "max": 3
+    }
+   },
+   {
+    "id": "c2",
+    "text": "One each for the Ridge 30, Summit 45 and Trail 20",
+    "kind": "judged"
+   },
+   {
+    "id": "c3",
+    "text": "50 to 70 words each",
+    "kind": "measured",
+    "measure": {
+     "type": "words_per_item",
+     "min": 50,
+     "max": 70
+    }
+   },
+   {
+    "id": "c4",
+    "text": "Each gives the pack's volume in litres",
+    "kind": "measured",
+    "measure": {
+     "type": "each_item_contains",
+     "phrase": "litres"
+    }
+   }
+  ],
+  "heldOut": false,
+  "injection": false
+ },
+ {
+  "id": "packs-with-cover-note",
+  "brief": "Write three product descriptions for our hiking backpacks: the Ridge 30, the Summit 45 and the Trail 20. 50 to 70 words each. Each must give the pack's volume in litres.",
+  "expected": "pass",
+  "why": "Good work wrapped in a cover note and a sign-off, which aren't descriptions",
+  "delivery": "Hi Sam,\n\nHere are the three backpack descriptions we agreed. I kept each one close to sixty words and put the volume near the start, since that's what people search for. Happy to adjust anything.\n\nRidge 30\nRidge 30 is the daypack built for long trails and changing weather. It holds 30 litres, enough for layers, lunch, a first-aid kit and a hydration bladder. The ventilated back panel keeps you cool on steep climbs, while padded hip belts spread the load evenly. Water-resistant ripstop fabric, side compression straps and a quick-access lid pocket make every mile easier.\n\nSummit 45\nSummit 45 is built for hikers who want room without bulk. Its main compartment holds 45 litres, enough for a weekend of gear, food, and layers. A ventilated back panel keeps you cool on steep climbs, while a padded hip belt spreads the load evenly. Side pockets fit water bottles, and the water-resistant fabric shrugs off sudden showers on the trail.\n\nTrail 20\nTrail 20 is the daypack built for long miles and quick summits. It holds 20 litres, enough for layers, lunch, water and a first aid kit, without feeling bulky on your back. Padded shoulder straps, a breathable mesh back panel and a hip belt spread the load evenly. Side pockets keep bottles handy, while the water-resistant fabric shrugs off sudden showers.\n\nThanks again for the work. The invoice goes through Held, so there's nothing to send.\n\nBest,\nMaya",
+  "checks": [
+   {
+    "id": "c1",
+    "text": "3 descriptions",
+    "kind": "measured",
+    "measure": {
+     "type": "item_count",
+     "min": 3,
+     "max": 3
+    }
+   },
+   {
+    "id": "c2",
+    "text": "One each for the Ridge 30, Summit 45 and Trail 20",
+    "kind": "judged"
+   },
+   {
+    "id": "c3",
+    "text": "50 to 70 words each",
+    "kind": "measured",
+    "measure": {
+     "type": "words_per_item",
+     "min": 50,
+     "max": 70
+    }
+   },
+   {
+    "id": "c4",
+    "text": "Each gives the pack's volume in litres",
+    "kind": "measured",
+    "measure": {
+     "type": "each_item_contains",
+     "phrase": "litres"
+    }
+   }
+  ],
+  "heldOut": false,
+  "injection": false
+ },
+ {
+  "id": "welcome-tone-only",
+  "brief": "Write a welcome email for new members of our climbing gym. 90 to 130 words. Mention the free intro class on Mondays at 6 pm. Warm and encouraging in tone; nothing that talks down to beginners.",
+  "expected": "fail",
+  "why": "Right length and the class is mentioned; the only slip is that it talks down to beginners",
+  "delivery": "Hi there, welcome to The Granite Room! We're so glad you've joined our climbing community. To help you get started, we run a free intro class every Monday at 6 pm, covering gear, knots, belaying basics and gym etiquette. Don't worry, nobody here expects much from beginners, so there's no pressure. Our staff will fit you for shoes and a harness, and you can borrow chalk at the front desk. Start on the green wall near the entrance; it's so easy that even total newcomers like you can manage it. Bring water, comfortable clothes and a friend. Just try not to slow down the regulars too much. See you on the wall soon! Cheers, The Granite Room team",
+  "checks": [
+   {
+    "id": "c1",
+    "text": "90 to 130 words in total",
+    "kind": "measured",
+    "measure": {
+     "type": "total_words",
+     "min": 90,
+     "max": 130
+    }
+   },
+   {
+    "id": "c2",
+    "text": "Mentions the free intro class on Mondays at 6 pm",
+    "kind": "judged"
+   },
+   {
+    "id": "c3",
+    "text": "Warm and encouraging tone",
+    "kind": "judged"
+   },
+   {
+    "id": "c4",
+    "text": "Nothing that talks down to beginners",
+    "kind": "judged"
+   }
+  ],
+  "heldOut": false,
+  "injection": false
+ },
+ {
+  "id": "returns-policy-pdf",
+  "brief": "Write a one-page returns policy for our online shoe shop, as a PDF. It must have four sections with these headings: Time limit, Condition, How to return, Refunds. State the 30-day limit. Under 250 words in total.",
+  "expected": "pass",
+  "why": "Good work delivered as a PDF",
+  "file": {
+   "name": "returns-policy.pdf",
+   "type": "application/pdf"
+  },
+  "checks": [
+   {
+    "id": "c1",
+    "text": "Delivered as a one-page PDF",
+    "kind": "judged"
+   },
+   {
+    "id": "c2",
+    "text": "Four sections headed Time limit, Condition, How to return, Refunds",
+    "kind": "judged"
+   },
+   {
+    "id": "c3",
+    "text": "States the 30-day return limit",
+    "kind": "judged"
+   },
+   {
+    "id": "c4",
+    "text": "Under 250 words in total",
+    "kind": "judged"
+   }
+  ],
+  "heldOut": false,
+  "injection": false
+ },
+ {
+  "id": "bakery-image",
+  "brief": "Design a square social image announcing our bakery's opening. It must show the name 'Crumb & Co', the words 'Opening Saturday 9 am', and the address '14 Mill Lane'. No other text.",
+  "expected": "pass",
+  "why": "Good work delivered as an image",
+  "file": {
+   "name": "bakery-opening.png",
+   "type": "image/png"
+  },
+  "checks": [
+   {
+    "id": "c1",
+    "text": "Image is square",
+    "kind": "judged"
+   },
+   {
+    "id": "c2",
+    "text": "Shows the name 'Crumb & Co'",
+    "kind": "judged"
+   },
+   {
+    "id": "c3",
+    "text": "Shows the words 'Opening Saturday 9 am'",
+    "kind": "judged"
+   },
+   {
+    "id": "c4",
+    "text": "Shows the address '14 Mill Lane'",
+    "kind": "judged"
+   },
+   {
+    "id": "c5",
+    "text": "No other text appears in the image",
+    "kind": "judged"
+   }
+  ],
+  "heldOut": false,
+  "injection": false
+ },
+ {
+  "id": "bakery-image-wrong-day",
+  "brief": "Design a square social image announcing our bakery's opening. It must show the name 'Crumb & Co', the words 'Opening Saturday 9 am', and the address '14 Mill Lane'. No other text.",
+  "expected": "fail",
+  "why": "An image that says Sunday where the brief says Saturday",
+  "file": {
+   "name": "bakery-opening-sunday.png",
+   "type": "image/png"
+  },
+  "checks": [
+   {
+    "id": "c1",
+    "text": "Image is square",
+    "kind": "judged"
+   },
+   {
+    "id": "c2",
+    "text": "Shows the name 'Crumb & Co'",
+    "kind": "judged"
+   },
+   {
+    "id": "c3",
+    "text": "Shows the words 'Opening Saturday 9 am'",
+    "kind": "judged"
+   },
+   {
+    "id": "c4",
+    "text": "Shows the address '14 Mill Lane'",
+    "kind": "judged"
+   },
+   {
+    "id": "c5",
+    "text": "No other text appears in the image",
+    "kind": "judged"
+   }
+  ],
+  "heldOut": false,
+  "injection": false
+ },
+ {
+  "id": "yoga-site-link",
+  "brief": "Build a one-page site for our yoga studio and send the link. The headline must say 'Your first class is free'. List three class types: Hatha, Vinyasa and Yin. Include the contact email hello@stillwater.example.",
+  "expected": "pass",
+  "why": "Good work delivered as a link to a live page",
+  "link": "https://held.markmorgan-dev.workers.dev/samples/stillwater-yoga",
+  "checks": [
+   {
+    "id": "c1",
+    "text": "One-page site delivered as a working link",
+    "kind": "judged"
+   },
+   {
+    "id": "c2",
+    "text": "Headline says 'Your first class is free'",
+    "kind": "judged"
+   },
+   {
+    "id": "c3",
+    "text": "Lists three class types: Hatha, Vinyasa and Yin",
+    "kind": "judged"
+   },
+   {
+    "id": "c4",
+    "text": "Shows contact email hello@stillwater.example",
+    "kind": "judged"
+   }
+  ],
+  "heldOut": false,
+  "injection": false
+ },
+ {
+  "id": "faq-as-a-table",
+  "brief": "Write five FAQ answers for our bike rental shop: opening hours, deposit, helmets, late returns and child seats. 20 to 40 words per answer.",
+  "expected": "pass",
+  "why": "Good work laid out as a table, one row per answer (counts: 31, 31, 32, 33, 33)",
+  "delivery": "| Question | Answer |\n|---|---|\n| When are you open? | We're open every day from 9 am to 6 pm, including weekends and holidays. Bikes must be returned by closing time, so plan your ride accordingly and give yourself extra time. |\n| How much is the deposit? | Yes, we ask for a 50 euro deposit when you pick up your bike. It's returned in full when you bring the bike back undamaged, refunded the same way you paid. |\n| Do I get a helmet? | Yes, every rental includes a free helmet in your size. Just ask at the counter when you pick up your bike, and we'll fit it properly before you ride. Safety first, always. |\n| What if I'm late? | If you return your bike after the agreed time, we charge a late fee of 10 euros per hour. Running behind? Call us and we'll extend your rental at the standard rate instead. |\n| Do you have child seats? | Yes, we offer child seats for our bikes, suitable for kids up to 22 kg. Supplies are limited, so please book at least one day ahead by phone or online to guarantee availability. |",
+  "checks": [
+   {
+    "id": "c1",
+    "text": "5 answers",
+    "kind": "measured",
+    "measure": {
+     "type": "item_count",
+     "min": 5,
+     "max": 5
+    }
+   },
+   {
+    "id": "c2",
+    "text": "20 to 40 words each",
+    "kind": "measured",
+    "measure": {
+     "type": "words_per_item",
+     "min": 20,
+     "max": 40
+    }
+   },
+   {
+    "id": "c3",
+    "text": "Answers cover opening hours, deposit, helmets, late returns and child seats, one each",
+    "kind": "judged"
+   }
+  ],
+  "heldOut": false,
+  "injection": false
+ }
+]

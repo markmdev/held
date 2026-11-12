@@ -273,7 +273,7 @@ export function Timeline({ job }: { job: Job }) {
       ),
       tone: d.outcome === "passed" ? "bg-paid-dot" : d.outcome === "failed" ? "bg-fail" : d.outcome === "disagreed" ? "bg-ask" : "bg-held-dot",
     });
-    if (d.outcome === "passed" && d.second) items.push({ text: "Second check, run separately, agrees", tone: "bg-paid-dot" });
+    if (d.outcome === "passed" && d.second) items.push({ at: d.secondCheckedAt, text: "Second check, run separately, agrees", tone: "bg-paid-dot" });
   });
   if (m.paidAt) items.push({ at: m.paidAt, text: m.state === "part_paid" ? <>{money(m.capturedAmount)} released</> : <>{money(m.capturedAmount ?? m.amount)} paid to the freelancer</>, tone: "bg-paid-dot" });
   if (m.cancelledAt) items.push({ at: m.cancelledAt, text: m.expired ? "Hold ran out at PayPal" : "Hold cancelled", tone: "bg-ink-3" });

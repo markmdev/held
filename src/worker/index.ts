@@ -7,7 +7,7 @@ import { dailyLeft, getJob, getJobRow, ledger, takeDaily, updateJob } from "./db
 import { measure, type Measured } from "./measure";
 import * as paypal from "./paypal";
 import { settle } from "./verdict";
-import { pdfText } from "./pdf";
+import { readDelivery, type Incoming } from "./delivery";
 import type { AgLlmRequest } from "ag-studio";
 import { agentTurn } from "./agent";
 
@@ -67,7 +67,7 @@ app.get("/stats", async (c) => {
     "SELECT (julianday(j.payout_done_at) - julianday(d.at)) * 86400 AS s FROM jobs j JOIN deliveries d ON d.job_id = j.id WHERE d.seconds_to_paid IS NOT NULL AND j.payout_done_at IS NOT NULL",
   ).all<{ s: number }>();
   const b = bench as BenchResult;
-  return c.json<Stats>({ jobsPaid: paid?.n ?? 0, medianSecondsToPaid: median(s), medianSecondsToPayout: median(payouts.map((r) => r.s)), benchRight: b.tuning.right + b.heldOut.right, benchTotal: b.tuning.total + b.heldOut.total });
+  return c.json<Stats>({ jobsPaid: paid?.n ?? 0, medianSecondsToPaid: median(s), medianSecondsToPayout: median(payouts.map((r) => r.s)), benchRight: b.tuning.right + b.heldOut.right + b.hard.right, benchTotal: b.tuning.total + b.heldOut.total + b.hard.total });
 });
 
 app.get("/ledger", async (c) => c.json(await ledger(c.env.DB)));
@@ -133,31 +133,6 @@ app.post("/jobs/:id/authorize", async (c) => {
   return c.json(await getJob(c.env.DB, row.id));
 });
 
-type Incoming = { text?: string; link?: string; file?: { name: string; type: string; base64: string } };
-
-async function readDelivery(d: Incoming): Promise<{ label: string; text: string | null; blocks: Record<string, unknown>[] }> {
-  if (d.text?.trim()) return { label: "Pasted text", text: d.text.slice(0, 60000), blocks: [{ type: "text", text: d.text.slice(0, 60000) }] };
-  if (d.file?.base64) {
-    const { name, type, base64 } = d.file;
-    if (base64.length > 7_000_000) throw new Error("bad: The file is over 5 MB.");
-    if (type === "application/pdf") return { label: name, text: await pdfText(Uint8Array.from(atob(base64), (ch) => ch.charCodeAt(0))), blocks: [{ type: "document", source: { type: "base64", media_type: type, data: base64 } }] };
-    if (/^image\/(png|jpeg|gif|webp)$/.test(type)) return { label: name, text: null, blocks: [{ type: "image", source: { type: "base64", media_type: type, data: base64 } }] };
-    if (type.startsWith("text/") || /\.(txt|md|csv|html?)$/i.test(name)) {
-      const text = new TextDecoder().decode(Uint8Array.from(atob(base64), (ch) => ch.charCodeAt(0))).slice(0, 60000);
-      return { label: name, text, blocks: [{ type: "text", text }] };
-    }
-    throw new Error("bad: Deliver text, a PDF, or a PNG or JPG image.");
-  }
-  if (d.link && /^https?:\/\//.test(d.link)) {
-    const res = await fetch(d.link, { headers: { "user-agent": "HeldChecker/1.0" }, redirect: "follow" }).catch(() => null);
-    if (!res?.ok) throw new Error("bad: The link didn't load.");
-    const html = (await res.text()).slice(0, 400000);
-    const text = html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ").replace(/<br\s*\/?>|<\/(p|div|li|h\d)>/gi, "\n").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/[ \t]+/g, " ").replace(/\n\s*\n+/g, "\n\n").trim().slice(0, 60000);
-    return { label: d.link.slice(0, 200), text, blocks: [{ type: "text", text }] };
-  }
-  throw new Error("bad: Paste the work, attach a file, or give a link.");
-}
-
 app.post("/jobs/:id/deliveries", async (c) => {
   const row = await getJobRow(c.env.DB, c.req.param("id"));
   if (!row) return fail(c, 404, "No job at this link.", "not_found");
@@ -184,12 +159,13 @@ app.post("/jobs/:id/deliveries", async (c) => {
 
   try {
     const first = settle(checks, measured, await checkDelivery(c.env.ANTHROPIC_API_KEY, FIRST_MODEL, row.brief, checks, facts, delivery.blocks), delivery.text);
+    const firstAt = now();
     let second = null as ReturnType<typeof settle> | null;
     if (first.allPass) second = settle(checks, measured, await checkDelivery(c.env.ANTHROPIC_API_KEY, SECOND_MODEL, row.brief, checks, facts, delivery.blocks), delivery.text);
     const outcome = !first.allPass ? "failed" : second!.allPass ? "passed" : "disagreed";
     const missing = outcome === "disagreed" ? second!.missing : first.missing;
-    await c.env.DB.prepare("UPDATE deliveries SET outcome = ?, first_json = ?, second_json = ?, missing_json = ? WHERE id = ?")
-      .bind(outcome, JSON.stringify(first.verdicts), second ? JSON.stringify(second.verdicts) : null, JSON.stringify(missing), id)
+    await c.env.DB.prepare("UPDATE deliveries SET outcome = ?, first_json = ?, second_json = ?, missing_json = ?, first_checked_at = ?, second_checked_at = ? WHERE id = ?")
+      .bind(outcome, JSON.stringify(first.verdicts), second ? JSON.stringify(second.verdicts) : null, JSON.stringify(missing), firstAt, second ? now() : null, id)
       .run();
     if (outcome === "passed") {
       const fresh = (await getJobRow(c.env.DB, row.id))!;

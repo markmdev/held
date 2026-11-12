@@ -35,6 +35,14 @@ function excerpt(text: string) {
   return /[.!?"”)]$/.test(t) ? t : `${t}…`;
 }
 
+const setOf = (c: BenchCase) => (c.hard ? "Harder" : c.heldOut ? "Held back" : "Tuning");
+
+/** How a harder case's work was delivered, when it wasn't pasted text. */
+function Kind({ c }: { c: BenchCase }) {
+  if (!c.kind || c.kind === "text") return null;
+  return <span className="mr-2 border border-dashed border-line px-1.5 py-px font-mono text-[10.5px] tracking-[0.1em] text-ink-2 uppercase">{c.kind === "pdf" ? "PDF" : c.kind}</span>;
+}
+
 function Injection() {
   return <span className="mr-2 border border-dashed border-ask px-1.5 py-px font-mono text-[10.5px] tracking-[0.1em] text-ask uppercase">Tries to instruct the checker</span>;
 }
@@ -43,10 +51,11 @@ function CaseRow({ c }: { c: BenchCase }) {
   return (
     <tr className={cx("border-t border-dashed border-line align-top", c.right === false && "bg-fail-bg/60")}>
       <td className="py-3 pr-4 pl-5 font-mono text-[12px] whitespace-nowrap text-ink-2">{c.id}</td>
-      <td className="py-3 pr-4 font-mono text-[11.5px] tracking-[0.08em] whitespace-nowrap text-ink-3 uppercase">{c.heldOut ? "Held back" : "Tuning"}</td>
+      <td className="py-3 pr-4 font-mono text-[11.5px] tracking-[0.08em] whitespace-nowrap text-ink-3 uppercase">{setOf(c)}</td>
       <td className="min-w-48 py-3 pr-4 font-serif text-[15.5px] leading-snug">{c.brief}</td>
       <td className="min-w-64 py-3 pr-4 text-[14.5px] leading-snug text-ink-2">
         {c.injection && <Injection />}
+        <Kind c={c} />
         {excerpt(c.deliveryExcerpt)}
       </td>
       <td className="py-3 pr-4">
@@ -67,7 +76,7 @@ function CaseItem({ c }: { c: BenchCase }) {
     <li className={cx("border-t border-dashed border-line px-4 py-4", c.right === false && "bg-fail-bg/60")}>
       <div className="flex items-baseline justify-between gap-3 font-mono text-[11.5px] tracking-[0.08em] text-ink-3 uppercase">
         <span>
-          {c.id} · {c.heldOut ? "Held back" : "Tuning"}
+          {c.id} · {setOf(c)}
         </span>
         <span className="flex items-baseline gap-2 normal-case">
           <Verdict v={c.expected} />
@@ -81,6 +90,7 @@ function CaseItem({ c }: { c: BenchCase }) {
       <div className="mt-2 font-serif text-[16px] leading-snug">{c.brief}</div>
       <p className="mt-1.5 text-[14.5px] leading-snug text-ink-2">
         {c.injection && <Injection />}
+        <Kind c={c} />
         {excerpt(c.deliveryExcerpt)}
       </p>
     </li>
@@ -122,8 +132,9 @@ export function Results() {
         <h1 className="mt-3 text-[40px] leading-[1.02] tracking-[-0.03em] sm:text-[56px]">Is the checker right?</h1>
         <p className="mt-4 text-[18px] leading-[1.55] text-ink-2">
           The checker is Claude, held to four rules and tested on briefs with known answers.{" "}
-          {bench.cases.length} briefs, each with a delivery and the verdict a careful person would give. {bench.tuning.total} were used while tuning the checker, and{" "}
-          {bench.heldOut.total} were held back and run once. Every case is listed, the misses first.
+          {bench.cases.length} briefs, each with a delivery and the verdict a careful person would give. {bench.tuning.total} were used while tuning the checker, {bench.heldOut.total}{" "}
+          were held back from tuning, and {bench.hard.total} harder ones were written after the checker was finished: near misses, the wrong subject, a slip in tone only, a PDF,
+          images, a link and odd layouts. Every case is listed, the misses first.
         </p>
         {bench.ranAt && <p className="mt-3 font-mono text-[11.5px] tracking-[0.1em] text-ink-3 uppercase">Last run {when(bench.ranAt)}</p>}
       </div>
@@ -134,7 +145,8 @@ export function Results() {
         </div>
       ) : (
         <>
-          <section className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
+          <section className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-5">
+            <Big value={`${bench.hard.right} of ${bench.hard.total}`} label="Right on the harder cases" note="Written last, never tuned on" tone={bench.hard.right === bench.hard.total ? undefined : "bad"} />
             <Big value={`${bench.heldOut.right} of ${bench.heldOut.total}`} label="Right on the held-back cases" note="Never seen while tuning" />
             <Big value={`${bench.tuning.right} of ${bench.tuning.total}`} label="Right on the tuning cases" />
             <Big value={String(wrongPays)} label="Times a failing delivery would have been paid" tone={wrongPays === 0 ? "good" : "bad"} />
@@ -169,7 +181,11 @@ export function Results() {
                       </span>
                     </div>
                     <div className="mt-2 font-serif text-[17px] leading-snug">{c.brief}</div>
-                    <p className="mt-1.5 text-[14.5px] text-ink-2">{excerpt(c.deliveryExcerpt)}</p>
+                    <p className="mt-1.5 text-[14.5px] text-ink-2">
+                      <Kind c={c} />
+                      {excerpt(c.deliveryExcerpt)}
+                    </p>
+                    {c.why && <p className="mt-2 text-[14.5px] text-ink">What it tests: {c.why}.</p>}
                   </li>
                 ))}
               </ul>
