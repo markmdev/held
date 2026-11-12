@@ -279,3 +279,8 @@
 .ag-studio-layout-editing .ag-studio-widget-toolbar-button[aria-label="Delete"] {
   display: none;
 }
+
+/* The chat's steps keep their names; the line under each one prints Studio's own codes (@field[…]), so it's left out. */
+.ag-studio-ai-step-subline {
+  display: none;
+}

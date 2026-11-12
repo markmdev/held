@@ -102,16 +102,19 @@ const inSeconds = (n: number) => `${secs.format(n)} s`;
 const stamp = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const clock = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" });
 
+// A chart gives its axis labels under a third of its width: about this many letters at 11px.
+const AXIS_LETTERS = 19;
+const cut = (text: string, letters: number) => (text.length > letters ? `${text.slice(0, letters - 1).trimEnd()}…` : text);
+
 export function ledgerData(rows: LedgerRow[]): AgDataSourcesDefinition {
-  // Charts group by their category, so each job's label must be its own: jobs started in the same minute get a number.
+  // Charts group by their category, so each job's label must be its own: jobs with the same title get a number.
   // Jobs all started on one day are told apart by the time alone.
   const startedAs = new Set(rows.map((r) => new Date(r.createdAt).toDateString())).size > 1 ? stamp : clock;
   const seen = new Map<string, number>();
   const labels = [...rows].reverse().map((r) => {
-    const base = startedAs.format(new Date(r.createdAt));
-    const n = (seen.get(base) ?? 0) + 1;
-    seen.set(base, n);
-    return n > 1 ? `${base} (${n})` : base;
+    const n = (seen.get(r.title) ?? 0) + 1;
+    seen.set(r.title, n);
+    return n > 1 ? `${cut(r.title, AXIS_LETTERS - 4)} (${n})` : cut(r.title, AXIS_LETTERS);
   }).reverse();
   const jobs = rows.map((r, i) => {
     const amount = Number(r.amount);
@@ -153,7 +156,7 @@ export function ledgerData(rows: LedgerRow[]): AgDataSourcesDefinition {
         fields: [
           { id: "id", name: "Job ID", format: "textFormat", hide: true },
           { id: "job", name: "Job", format: "textFormat" },
-          { id: "label", name: "Started at", format: "textFormat" },
+          { id: "label", name: "Job name", format: "textFormat" },
           { id: "started", name: "Started", format: "dateTimeFormat", formatOptions: { format: startedAs } },
           { id: "money", name: "Money", format: "textFormat", context: { cell: "money" } },
           { id: "amount", name: "Amount", ...money },
@@ -175,7 +178,7 @@ export function ledgerData(rows: LedgerRow[]): AgDataSourcesDefinition {
         data: paid,
         fields: [
           { id: "jobId", name: "Job ID", format: "textFormat", hide: true },
-          { id: "label", name: "Started at", format: "textFormat" },
+          { id: "label", name: "Job name", format: "textFormat" },
           { id: "seconds", name: "Seconds, delivery to paid", format: "decimalFormat", formatOptions: { format: secs } },
         ],
       },
@@ -203,6 +206,7 @@ const title = (text: string, subtitle?: string) => ({
   title: { enabled: true, text },
   ...(subtitle ? { subtitle: { enabled: true, text: subtitle } } : {}),
 });
+const JOB_AXIS = { categoryAxis: { label: { fontSize: 11 } } };
 const kpi = (text: string, value: { id: string; aggregation?: "sum" | "countd" }, color: string) => ({
   type: "value" as const,
   dataMapping: { value: [value] },
@@ -218,8 +222,8 @@ function places(jobs: number) {
     "median-secs": at(12, 0, 6, 6),
     jobs: at(18, 0, 6, 6),
     "money-by-job": at(0, 6, 9, 18),
-    "seconds-to-paid": at(9, 6, 7, 18),
-    verdicts: at(16, 6, 8, 18),
+    "seconds-to-paid": at(9, 6, 9, 18),
+    verdicts: at(18, 6, 6, 18),
     grid: at(0, 24, 24, grid),
     proof: at(0, 24 + grid, 24, 22),
   };
@@ -263,12 +267,12 @@ function ledgerReport(widgetLayout: Record<string, AgWidgetLayoutState>): AgRepo
           "money-by-job": {
             type: "bar-chart-stacked",
             dataMapping: { categoryKey: [{ id: "jobs.label" }], valueKey: [{ id: "paidTotal" }, { id: "heldTotal" }, { id: "returnedTotal" }] },
-            format: { ...title("Money held against paid", "Each job: paid, held, or returned"), style: { theme: { common: { legend: { enabled: true } } } }, crossFilter: "highlight" },
+            format: { ...title("Money held against paid", "Each job: paid, held, or returned"), style: { theme: { common: { legend: { enabled: true } } }, custom: JOB_AXIS }, crossFilter: "highlight" },
           },
           "seconds-to-paid": {
-            type: "column-chart-grouped",
+            type: "bar-chart-grouped",
             dataMapping: { categoryKey: [{ id: "paid.label" }], valueKey: [{ id: "paid.seconds", aggregation: "min" }] },
-            format: { ...title("Seconds to paid", "From delivery, for each job paid on a pass"), crossFilter: "highlight" },
+            format: { ...title("Seconds to paid", "From delivery, for each job paid on a pass"), style: { custom: JOB_AXIS }, crossFilter: "highlight" },
           },
           verdicts: {
             type: "bar-chart-stacked",

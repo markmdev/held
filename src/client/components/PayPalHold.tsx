@@ -22,18 +22,18 @@ function loadSdk(clientId: string) {
 function CopyLine({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <div className="flex items-center justify-between gap-2 py-1">
-      <span className="text-[13px] text-ink-2">{label}</span>
+    <div className="py-1">
+      <div className="text-[12.5px] text-ink-2">{label}</div>
       <button
-        className="flex min-w-0 items-center gap-2 rounded-[3px] px-1.5 py-0.5 font-mono text-[13px] hover:bg-line-2"
+        className="-mx-1.5 flex w-[calc(100%+12px)] items-baseline justify-between gap-2 rounded-[3px] px-1.5 py-0.5 text-left font-mono text-[13px] hover:bg-line-2"
         onClick={() => {
           void navigator.clipboard?.writeText(value);
           setCopied(true);
           setTimeout(() => setCopied(false), 1200);
         }}
       >
-        <span className="truncate">{value}</span>
-        <span className={copied ? "text-[10.5px] tracking-[0.12em] text-paid uppercase" : "text-[10.5px] tracking-[0.12em] text-ink-3 uppercase"}>{copied ? "Copied" : "Copy"}</span>
+        <span className="min-w-0 break-all">{value}</span>
+        <span className={copied ? "shrink-0 text-[10.5px] tracking-[0.12em] text-paid uppercase" : "shrink-0 text-[10.5px] tracking-[0.12em] text-ink-3 uppercase"}>{copied ? "Copied" : "Copy"}</span>
       </button>
     </div>
   );
