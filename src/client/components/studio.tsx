@@ -313,11 +313,12 @@ const VERDICT_BY_WORD = Object.fromEntries(Object.entries(VERDICT_WORDS).map(([k
 const MONEY_TEXT: Record<LedgerRow["state"], string> = { awaiting_hold: "text-ink-3", held: "text-held", paid: "text-paid", part_paid: "text-paid", cancelled: "text-ink-3" };
 const VERDICT_TEXT: Record<LedgerRow["verdict"], string> = { checking: "text-ink-2", passed: "text-paid", failed: "text-fail", disagreed: "text-ask", none: "text-ink-3" };
 
-// The table sizes each column to its values as plain 13px text, so a cell's words must not set wider than that: 11.5px with next to no tracking.
+// The table sizes a column to its widest cell in whole pixels, so a width with a fraction is cut with "…".
+// Each letter here is a whole number of pixels wide: 12px Plex Mono is 7.2px a letter, plus 0.8px of tracking.
 function wordCell(tones: (word: string) => string | undefined) {
   return (p: { value?: string }) => {
     const tone = tones(p.value ?? "");
-    return <span className={tone ? `text-[11.5px] font-semibold tracking-[0.02em] uppercase ${tone}` : "text-[12.5px] text-ink-2"}>{p.value || "–"}</span>;
+    return <span className={tone ? `text-[12px] font-semibold tracking-[0.8px] uppercase ${tone}` : "text-[12px] tracking-[0.8px] text-ink-2"}>{p.value || "–"}</span>;
   };
 }
 const CELLS: Record<string, ReturnType<typeof wordCell>> = {
@@ -349,22 +350,24 @@ function ProofTrail(params: AgWidgetParams) {
   const list = ids ? ids.split(" ") : [];
   if (list.length === 0) return <Quiet>No jobs to show.</Quiet>;
   const rows = (params.context as { rows: LedgerRow[] }).rows;
-  const newest = rows.find((r) => list.includes(r.id))?.id ?? list[0];
-  return <Proof id={newest} picked={list.length === 1} />;
+  // Until a row is picked, show the newest job that was paid: its trail is whole, from the hold to the payout.
+  const shown = rows.filter((r) => list.includes(r.id));
+  const first = shown.find((r) => r.state === "paid") ?? shown[0];
+  return <Proof id={first?.id ?? list[0]} lead={list.length === 1 ? "The job you picked" : `The newest ${first?.state === "paid" ? "paid " : ""}job. Click a row to pick another.`} />;
 }
 
 function Quiet({ children }: { children: React.ReactNode }) {
   return <div className="flex h-full items-center justify-center gap-2 px-2 text-center text-[14px] text-ink-3">{children}</div>;
 }
 
-function Proof({ id, picked }: { id: string; picked: boolean }) {
+function Proof({ id, lead }: { id: string; lead: string }) {
   const { data: job, error } = useJob(id);
   if (error) return <Quiet>{error}</Quiet>;
   if (!job) return <Quiet><Spinner /> Loading the job</Quiet>;
-  return <ProofBody job={job} picked={picked} />;
+  return <ProofBody job={job} lead={lead} />;
 }
 
-function ProofBody({ job, picked }: { job: Job; picked: boolean }) {
+function ProofBody({ job, lead }: { job: Job; lead: string }) {
   const m = job.money;
   const last = job.deliveries.at(-1);
   const steps: { label: string; id?: string; note?: string; done: boolean }[] = [
@@ -376,7 +379,7 @@ function ProofBody({ job, picked }: { job: Job; picked: boolean }) {
     <div className="@container h-full overflow-auto px-2 pb-2 text-ink">
      <div className="@3xl:grid @3xl:grid-cols-[320px_minmax(0,1fr)] @3xl:gap-x-12">
      <div className="flex min-w-0 flex-col">
-      <div className="font-mono text-[11px] tracking-[0.1em] text-ink-3 uppercase">{picked ? "The job you picked" : "The newest job. Click a row to pick another."}</div>
+      <div className="font-mono text-[11px] tracking-[0.1em] text-ink-3 uppercase">{lead}</div>
       <Link href={`/j/${job.id}`} className="mt-1.5 font-serif text-[19px] leading-snug font-medium hover:underline">
         {job.title}
       </Link>

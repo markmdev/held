@@ -272,3 +272,10 @@
     animation: held-fade 200ms ease both;
   }
 }
+
+/* The ledger's chat needs Studio's edit mode; people still can't move, resize, copy or remove a widget. */
+.ag-studio-layout-editing .ag-studio-layout-widget-overlay,
+.ag-studio-layout-editing .ag-studio-widget-toolbar-button[aria-label="Duplicate"],
+.ag-studio-layout-editing .ag-studio-widget-toolbar-button[aria-label="Delete"] {
+  display: none;
+}

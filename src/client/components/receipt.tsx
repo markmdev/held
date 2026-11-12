@@ -243,6 +243,13 @@ export function Receipt({ job, compact = false }: { job: Job; compact?: boolean 
 
 /* ---------- what happened, in order ---------- */
 
+/** The time alone, or the day with it when it isn't the day the job started. */
+function happenedAt(at: string, started: string) {
+  const d = new Date(at);
+  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" });
+  return d.toDateString() === new Date(started).toDateString() ? time : `${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${time}`;
+}
+
 const failedWords = (n: number) => (n === 1 ? "1 check failed" : `${n} checks failed`);
 
 export function Timeline({ job }: { job: Job }) {
@@ -268,7 +275,7 @@ export function Timeline({ job }: { job: Job }) {
         <li key={i} className="relative pb-4 pl-4 last:pb-0">
           <span className={cx("absolute top-[6px] -left-[5px] h-2 w-2 rounded-full", it.tone)} />
           <div className="text-ink">{it.text}</div>
-          <div className="text-ink-3">{it.at ? new Date(it.at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" }) : ""}</div>
+          <div className="text-ink-3">{it.at ? happenedAt(it.at, job.createdAt) : ""}</div>
         </li>
       ))}
     </ol>
