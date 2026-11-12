@@ -14,7 +14,8 @@
     "noEmit": true,
     "types": [
       "@cloudflare/workers-types",
-      "vite/client"
+      "vite/client",
+      "node"
     ],
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true
