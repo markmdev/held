@@ -127,13 +127,14 @@ export function NewJob() {
                   {checks.map((c, i) => (
                     <li key={c.id} className="flex items-center gap-2">
                       <span className="w-5 shrink-0 text-right text-[13px] font-semibold text-ink-3">{i + 1}</span>
-                      <input
-                        className="field py-2"
+                      <textarea
+                        rows={1}
+                        className="field resize-none py-2 [field-sizing:content]"
                         value={c.text}
                         aria-label={`Check ${i + 1}`}
-                        onChange={(e) => setChecks(checks.map((x) => (x.id === c.id ? { id: x.id, text: e.target.value, kind: "judged" } : x)))}
+                        onChange={(e) => setChecks(checks.map((x) => (x.id === c.id ? { id: x.id, text: e.target.value.replace(/\n/g, " "), kind: "judged" } : x)))}
                       />
-                      <span className="hidden shrink-0 rounded-md bg-line-2 px-1.5 py-0.5 text-[11px] font-semibold text-ink-2 sm:inline">
+                      <span className="hidden w-[72px] shrink-0 rounded-md bg-line-2 py-0.5 text-center text-[11px] font-semibold text-ink-2 sm:inline">
                         {c.kind === "measured" ? "Measured" : "Judged"}
                       </span>
                       <button

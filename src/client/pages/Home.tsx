@@ -50,20 +50,20 @@ export function Home() {
           <div className="inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-[13px] font-semibold text-ink-2 shadow-[0_0_0_1px_var(--color-line)]">
             <Mark size={16} /> For freelancers and the clients who hire them
           </div>
-          <h1 className="mt-5 text-[44px] leading-[1.02] font-[780] sm:text-[64px]">Paid the minute the work passes.</h1>
+          <h1 className="mt-5 text-[44px] leading-[1.02] font-bold tracking-[-0.035em] sm:text-[64px]">Paid the minute the work passes.</h1>
           <p className="mt-5 max-w-xl text-[18px] leading-relaxed text-ink-2">
             PayPal holds the client's money while the freelancer works. An AI check reads the delivery against the brief both sides agreed and quotes the work for every
             item. When it all passes, the freelancer is paid in seconds. No invoice, no chasing.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Link href="/new?example=1" className="btn h-12 px-5 text-[16px]">
-              Try it with the example job
+              Try a sample job
             </Link>
             <Link href="/new" className="btn btn-quiet h-12 px-5 text-[16px]">
               Write your own brief
             </Link>
           </div>
-          <p className="mt-3 text-[13.5px] text-ink-3">About two minutes, nothing to install. PayPal sandbox money, with the login shown when you need it.</p>
+          <p className="mt-3 text-[13.5px] text-ink-3">Takes about two minutes. Payments run in PayPal's sandbox, and the test buyer's login is shown when you need it.</p>
         </div>
         {proofId && <ProofOf id={proofId} />}
       </section>
@@ -79,7 +79,7 @@ export function Home() {
           <StatBox
             value={stats?.benchTotal ? `${stats.benchRight} of ${stats.benchTotal}` : "–"}
             label="Verdicts right on the test set"
-            note="Misses listed on the results page"
+            note="Every miss is listed"
           />
         </Link>
       </section>

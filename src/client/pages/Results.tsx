@@ -70,14 +70,13 @@ export function Results() {
   return (
     <Page>
       <div className="max-w-3xl">
-        <h1 className="text-[34px] leading-tight font-[750] sm:text-[42px]">How well the checker judges</h1>
+        <h1 className="text-[34px] leading-tight font-[750] sm:text-[42px]">Accuracy</h1>
         <p className="mt-2 text-[17px] leading-relaxed text-ink-2">
-          {bench.cases.length} briefs, each with a delivery and the verdict a careful person would give. Twenty were used while tuning the checker; ten were held back and run
-          once. Every case is listed, the misses first.
+          {bench.cases.length} briefs, each with a delivery and the verdict a careful person would give. {bench.tuning.total} were used while tuning the checker, and{" "}
+          {bench.heldOut.total} were held back and run once. Every case is listed, the misses first.
         </p>
         <p className="mt-2 text-[14px] text-ink-3">
-          {bench.ranAt ? <>Last run {when(bench.ranAt)}. </> : null}
-          Run it yourself from the repo: <code className="rounded bg-line-2 px-1.5 py-0.5 font-mono text-[13px] text-ink">npm run bench</code>
+          {bench.ranAt ? <>Last run {when(bench.ranAt)}.</> : null}
         </p>
       </div>
 

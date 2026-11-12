@@ -1,31 +1,35 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Link } from "wouter";
 import type { Check, Delivery, Job, Verdict } from "../../shared/types";
 import { cx, IdChip, money, MoneyPill, OutcomePill, seconds, SeededTag, Spinner, when } from "./ui";
 
 /* ---------- the money ---------- */
 
-function headline(job: Job): { title: ReactNode; text: ReactNode } {
+function headline(job: Job): { amount: string; line: ReactNode; text: ReactNode; tone: string } {
   const m = job.money;
   const last = job.deliveries.at(-1);
   const to = <span className="font-semibold text-ink">{job.freelancerEmail}</span>;
   switch (m.state) {
     case "awaiting_hold":
-      return { title: <>{money(m.amount)} not held yet</>, text: <>Approve the hold with PayPal to start the job. Nothing is taken from your account until the work passes.</> };
+      return { amount: money(m.amount), line: "not held yet", tone: "text-ink", text: <>Approve the hold with PayPal to start the job. Nothing is taken from the client's account until the work passes.</> };
     case "paid":
       return {
-        title: <>{money(m.capturedAmount ?? m.amount)} paid</>,
-        text: m.state === "paid" && last?.outcome === "passed" ? <>Every check passed, so PayPal took the held money and sent it to {to}.</> : <>The client released the money to {to}.</>,
+        amount: money(m.capturedAmount ?? m.amount),
+        line: "paid",
+        tone: "text-paid",
+        text: last?.outcome === "passed" ? <>Every check passed, so PayPal took the held money and sent it to {to}.</> : <>The client released the money to {to}.</>,
       };
     case "part_paid": {
       const back = Number(m.amount) - Number(m.capturedAmount ?? 0);
       return {
-        title: <>{money(m.capturedAmount)} of {money(m.amount)} released</>,
+        amount: money(m.capturedAmount),
+        line: <>of {money(m.amount)} released</>,
+        tone: "text-paid",
         text: <>The client released part of the hold to {to}. The other {money(back.toFixed(2))} stayed with the client.</>,
       };
     }
     case "cancelled":
-      return { title: <>Hold of {money(m.amount)} cancelled</>, text: <>The client cancelled the hold, so the money stayed with them. Nothing was paid.</> };
+      return { amount: money(m.amount), line: "hold cancelled", tone: "text-ink-3", text: <>The client cancelled the hold, so the money stayed with them. Nothing was paid.</> };
     default: {
       const fails = last?.first.filter((v) => !v.pass).length ?? 0;
       const text =
@@ -34,7 +38,7 @@ function headline(job: Job): { title: ReactNode; text: ReactNode } {
         : last.outcome === "failed" ? <>The latest delivery missed {fails} of {job.checks.length} checks, so the money stays held until they pass.</>
         : last.outcome === "disagreed" ? <>The two checks disagree on this delivery, so nothing moves until the client decides.</>
         : <>Nobody has this money yet. It goes to {to} the moment every check passes.</>;
-      return { title: <>{money(m.amount)} held by PayPal</>, text };
+      return { amount: money(m.amount), line: "held by PayPal", tone: "text-held", text };
     }
   }
 }
@@ -88,21 +92,24 @@ export function MoneyCard({ job }: { job: Job }) {
             {last && m.state === "held" && <OutcomePill outcome={last.outcome} />}
             {job.seeded && <SeededTag />}
           </div>
-          <h1 className="mt-4 text-[34px] leading-[1.05] font-[750] sm:text-[46px]">{h.title}</h1>
+          <h1 className="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className={cx("text-[56px] leading-[0.95] font-bold tracking-[-0.045em] transition-colors duration-300 sm:text-[76px]", h.tone)}>{h.amount}</span>
+            <span className="text-[22px] font-semibold tracking-[-0.02em] sm:text-[26px]">{h.line}</span>
+          </h1>
           {paid && last?.secondsToPaid != null && (
-            <div className="mt-3 inline-flex items-baseline gap-2 rounded-xl bg-paid-bg px-3 py-1.5 text-paid">
-              <span className="text-[22px] font-[750] tracking-[-0.02em]">Paid in {seconds(last.secondsToPaid)}</span>
-              <span className="text-[13px] font-semibold">from delivery to payout</span>
+            <div className="mt-3 inline-flex items-baseline gap-2 rounded-full bg-paid-bg px-3.5 py-1.5 text-paid">
+              <span className="text-[17px] font-bold">Paid in {seconds(last.secondsToPaid)}</span>
+              <span className="text-[13px] font-medium">from delivery to payout</span>
             </div>
           )}
-          <p className="mt-3 max-w-xl text-[16px] leading-relaxed text-ink-2">{h.text}</p>
+          <p className="mt-4 max-w-xl text-[16px] leading-relaxed text-ink-2">{h.text}</p>
           <div className="mt-6">
             <StepRail job={job} />
           </div>
         </div>
         <div className={cx("rounded-2xl border border-line-2 bg-paper/60 px-4 py-2", !m.orderId && "hidden lg:block")}>
           <div className="flex items-center justify-between pt-1 pb-1">
-            <span className="label">PayPal sandbox</span>
+            <span className="label">PayPal</span>
             {m.heldAt && <span className="text-[12px] text-ink-3">held {when(m.heldAt)}</span>}
           </div>
           <div className="divide-y divide-line-2">
@@ -184,11 +191,11 @@ function Quote({ children, tone }: { children: ReactNode; tone: "pass" | "fail" 
   );
 }
 
-function VerdictRow({ check, a, b }: { check: Check; a?: Verdict; b?: Verdict }) {
+function VerdictRow({ check, a, b, i }: { check: Check; a?: Verdict; b?: Verdict; i: number }) {
   const disagree = !!(a && b && a.pass !== b.pass);
   const tone = disagree ? "ask" : a?.pass ? "pass" : "fail";
   return (
-    <li className="flex gap-3 py-3">
+    <li className="rise flex gap-3 py-3" style={{ "--i": i } as CSSProperties}>
       <Tick state={disagree ? "ask" : a?.pass ? "pass" : "fail"} />
       <div className="min-w-0 flex-1">
         <div className="text-[15px] font-semibold">{check.text}</div>
@@ -226,7 +233,7 @@ function Elapsed({ since }: { since: string }) {
     const t = setInterval(() => setNow(Date.now()), 250);
     return () => clearInterval(t);
   }, []);
-  return <span className="ml-auto shrink-0 font-mono text-[15px] font-semibold text-ink tabular-nums">{Math.max(0, (now - Date.parse(since)) / 1000).toFixed(0)} s</span>;
+  return <span className="ml-auto shrink-0 font-mono text-[15px] font-medium text-held tabular-nums">{Math.max(0, (now - Date.parse(since)) / 1000).toFixed(0)} s</span>;
 }
 
 export function DeliveryCard({ job, d, n, latest }: { job: Job; d: Delivery; n: number; latest: boolean }) {
@@ -253,13 +260,24 @@ export function DeliveryCard({ job, d, n, latest }: { job: Job; d: Delivery; n: 
         </button>
       </div>
       {d.outcome === "checking" ? (
-        <div className="flex gap-3 px-5 py-5 text-[15px] leading-relaxed text-ink-2 sm:px-6">
-          <Spinner className="mt-1 shrink-0 text-held" />
-          <span>
-            <span className="font-semibold text-ink">Checking the work against the {job.checks.length} checks.</span> If every one passes, a second, separate check reads it
-            again, and then PayPal pays.
-          </span>
-          <Elapsed since={d.at} />
+        <div className="relative mx-5 my-4 overflow-hidden rounded-2xl border border-held-dot/35 bg-held-bg sm:mx-6">
+          <div className="shimmer pointer-events-none absolute inset-0" aria-hidden />
+          <div className="relative flex items-start gap-3 px-4 pt-3.5 pb-2">
+            <Spinner className="mt-1 shrink-0 text-held" />
+            <div className="min-w-0 flex-1">
+              <div className="text-[15.5px] font-bold text-held">Checking the work</div>
+              <div className="text-[13.5px] leading-relaxed text-ink-2">If every check passes, a second, separate check reads it again, and then PayPal pays.</div>
+            </div>
+            <Elapsed since={d.at} />
+          </div>
+          <ul className="relative px-4 pb-3.5">
+            {job.checks.map((c) => (
+              <li key={c.id} className="flex items-center gap-2.5 py-1 text-[14px] text-ink-2">
+                <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-held-dot" />
+                <span className="min-w-0 truncate">{c.text}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       ) : !verdicts ? (
         <button onClick={() => setVerdicts(true)} className="mx-5 my-4 flex w-[calc(100%-2.5rem)] items-center justify-between rounded-xl border border-line px-4 py-2.5 text-left text-[14px] sm:mx-6 sm:w-[calc(100%-3rem)]">
@@ -270,8 +288,8 @@ export function DeliveryCard({ job, d, n, latest }: { job: Job; d: Delivery; n: 
         </button>
       ) : (
         <ul className="divide-y divide-line-2 px-5 sm:px-6">
-          {job.checks.map((c) => (
-            <VerdictRow key={c.id} check={c} a={d.first.find((v) => v.checkId === c.id)} b={d.second?.find((v) => v.checkId === c.id)} />
+          {job.checks.map((c, i) => (
+            <VerdictRow key={c.id} i={i} check={c} a={d.first.find((v) => v.checkId === c.id)} b={d.second?.find((v) => v.checkId === c.id)} />
           ))}
         </ul>
       )}
@@ -345,14 +363,17 @@ function Deliver({ job, actions }: { job: Job; actions: JobActions }) {
   return (
     <>
       {actions.deliverExample && (
-        <div className="mb-4 grid gap-2">
-          <button className="btn btn-quiet justify-start" disabled={!can} onClick={() => actions.deliverExample!("unfinished")}>
-            <span className="h-2 w-2 rounded-full bg-fail" /> Deliver the unfinished example
-          </button>
-          <button className="btn btn-quiet justify-start" disabled={!can} onClick={() => actions.deliverExample!("finished")}>
-            <span className="h-2 w-2 rounded-full bg-paid-dot" /> Deliver the finished example
-          </button>
-          <div className="pt-1 text-center text-[12.5px] text-ink-3">or deliver your own</div>
+        <div className="mb-4">
+          <div className="label mb-2">Sample deliveries</div>
+          <div className="grid gap-2">
+            <button className="btn btn-quiet justify-start" disabled={!can} onClick={() => actions.deliverExample!("unfinished")}>
+              <span className="h-2 w-2 rounded-full bg-fail" /> A draft that falls short
+            </button>
+            <button className="btn btn-quiet justify-start" disabled={!can} onClick={() => actions.deliverExample!("finished")}>
+              <span className="h-2 w-2 rounded-full bg-paid-dot" /> The finished work
+            </button>
+          </div>
+          <div className="mt-4 label">Or deliver your own</div>
         </div>
       )}
       <div className="mb-2 flex rounded-xl bg-line-2 p-1 text-[13.5px] font-semibold">

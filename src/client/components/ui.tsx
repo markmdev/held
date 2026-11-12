@@ -29,7 +29,7 @@ export function Wordmark() {
 const NAV = [
   { href: "/new", label: "New job" },
   { href: "/ledger", label: "Ledger" },
-  { href: "/results", label: "Results" },
+  { href: "/results", label: "Accuracy" },
 ];
 
 export function TopBar() {
@@ -54,7 +54,7 @@ export function TopBar() {
             </Link>
           ))}
           <span className="ml-1 hidden rounded-full border border-dashed border-ink-3/60 px-2.5 py-1 text-[12px] font-semibold text-ink-2 sm:inline">
-            Sandbox money
+            Test mode
           </span>
         </nav>
       </div>
@@ -71,7 +71,7 @@ export function Page({ children, wide }: { children: ReactNode; wide?: boolean }
         <span className="flex items-center gap-2">
           <Mark size={16} /> Held · paid the minute the work passes
         </span>
-        <span>PayPal sandbox only: no real money moves.</span>
+        <span>Test mode: payments run in PayPal's sandbox, so no real money moves.</span>
       </footer>
     </div>
   );
@@ -136,26 +136,51 @@ export function Spinner({ className }: { className?: string }) {
   return <span className={cx("inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-r-transparent", className)} aria-hidden />;
 }
 
-/** One of PayPal's IDs, in mono, with a copy button: the proof that money really moved. */
-export function IdChip({ label, value, status }: { label: string; value?: string; status?: string }) {
+const CopyIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+    <rect x="5" y="5" width="8.5" height="8.5" rx="2" stroke="currentColor" strokeWidth="1.5" />
+    <path d="M10.5 3.2A1.7 1.7 0 0 0 9 2.5H4.2A1.7 1.7 0 0 0 2.5 4.2V9a1.7 1.7 0 0 0 .7 1.4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+const TickIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+    <path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+/** Copies a value and shows a tick for a moment. */
+export function useCopy(value: string) {
   const [copied, setCopied] = useState(false);
+  return {
+    copied,
+    copy: () => {
+      void navigator.clipboard?.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1400);
+    },
+  };
+}
+
+/** One of PayPal's IDs: a mono pill with a copy button, the proof that money really moved. */
+export function IdChip({ label, value, status }: { label: string; value?: string; status?: string }) {
+  const { copied, copy } = useCopy(value ?? "");
   return (
     <div className="flex min-w-0 items-center justify-between gap-3 py-2">
       <span className="shrink-0 text-[13px] text-ink-2">{label}</span>
       {value ? (
-        <button
-          onClick={() => {
-            void navigator.clipboard?.writeText(value);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1200);
-          }}
-          className="group flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-0.5 font-mono text-[12.5px] text-ink hover:bg-line-2"
-          title="Copy"
-        >
-          <span className="truncate">{value}</span>
+        <span className="flex min-w-0 items-center gap-1.5">
           {status && <PayoutStatus status={status} />}
-          <span className="shrink-0 text-[11px] font-sans text-ink-3 group-hover:text-ink-2">{copied ? "Copied" : "Copy"}</span>
-        </button>
+          <button
+            onClick={copy}
+            aria-label={`Copy ${label.toLowerCase()} ID`}
+            className="flex min-w-0 items-center gap-1.5 rounded-full border border-line bg-card py-1 pr-1 pl-2.5 font-mono text-[12.5px] text-ink transition-colors duration-150 hover:border-ink-3"
+          >
+            <span className="truncate">{value}</span>
+            <span className={cx("grid h-6 w-6 shrink-0 place-items-center rounded-full transition-colors duration-150", copied ? "bg-paid-dot text-white" : "bg-line-2 text-ink-2")}>
+              {copied ? <TickIcon /> : <CopyIcon />}
+            </span>
+          </button>
+        </span>
       ) : (
         <span className="text-[13px] text-ink-3">–</span>
       )}
@@ -178,8 +203,8 @@ function PayoutStatus({ status }: { status: string }) {
 
 export function SeededTag() {
   return (
-    <span className="rounded-full border border-line px-2 py-0.5 text-[11.5px] font-semibold text-ink-3" title="Run by the team through the live site before submitting">
-      Example run
+    <span className="rounded-full border border-line px-2 py-0.5 text-[11.5px] font-semibold text-ink-3" title="A sample job, run through Held with PayPal's sandbox">
+      Sample job
     </span>
   );
 }

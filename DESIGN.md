@@ -18,15 +18,23 @@ Everything else is ink on paper: `ink`, `ink-2`, `ink-3` for text, `line` and `l
 
 ## Type and shapes
 
-- The system's own sans and mono fonts, with tabular numbers, so there is no font to license or load.
-- PayPal's IDs are always in mono with a Copy button: they are the proof that money moved.
+- IBM Plex Sans for words, Plex Mono for PayPal's IDs and Plex Serif for a delivery's own text, all under the open font licence, with tabular numbers.
+- The amount is the hero of a job: one big number in its state's colour, the state in words beside it.
+- PayPal's IDs are always mono pills with a copy button that turns to a tick: they are the proof that money moved.
 - Cards have an 18px radius and a hairline shadow (`.card`). Buttons are 44px tall (`.btn`, `.btn-quiet`, `.btn-danger`), fields use `.field`, small capitals labels use `.label`.
 - The name mark is an amber coin held between two bars: the client's money, between the two sides, until the work passes.
+
+## Motion
+
+- Only transform and opacity move, under 300 ms, easing out (`--ease-out`). Buttons press in to 0.97.
+- Two moments move on purpose: the amber checking panel, with light passing across it while the work is read, and a verdict's rows rising in one after another when it lands.
+- With reduced motion on, nothing slides; things fade.
 
 ## Words
 
 - Say what the person sees and does: "Release $150 now", "Not yet", "Checks disagree". No internal words such as authorization, capture or outcome on screen; PayPal's own names stay only beside their IDs.
 - No third-party names or logos on screen besides PayPal's own buttons: say "AI check", not the model's name.
+- Held reads as a product in test mode, not a demo: "Test mode", "Sample job", "Try a sample job", "A draft that falls short", "The finished work". Never "demo", "example" or "hackathon".
 - A failure says what happened and what to do next, and never looks like an empty page.
 
 ## Layout

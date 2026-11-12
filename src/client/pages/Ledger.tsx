@@ -39,7 +39,7 @@ export function Ledger() {
           <Empty title="No jobs yet">
             The first job shows here once its money is held.{" "}
             <Link href="/new?example=1" className="font-semibold text-ink underline">
-              Try the example job
+              Try a sample job
             </Link>
           </Empty>
         ) : (

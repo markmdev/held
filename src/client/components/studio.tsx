@@ -12,7 +12,7 @@ import { cx, money, MoneyPill, OutcomePill, seconds, Spinner, when } from "./ui"
 const ROW = 18;
 const v = (name: string) => `var(--color-${name})`;
 const line = (name: string) => ({ width: 1, color: v(name) });
-const FONT = "ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+const FONT = "'IBM Plex Sans', ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif";
 
 // Charts take the palette in the order of their measures, so every chart lists its measures in this order:
 // paid green, held amber, grey, failed red, disagree violet.
@@ -69,6 +69,7 @@ export const heldTheme = studioTheme.withParams({
   gridHeaderRowBorder: line("line"),
   gridRowHoverColor: v("paper"),
   gridWrapperBorder: false,
+  gridCellHorizontalPadding: 14,
 
   chartFontFamily: FONT,
   chartTextColor: v("ink-2"),
@@ -97,20 +98,29 @@ const inSeconds = (n: number) => `${secs.format(n)} s`;
 const stamp = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 export function ledgerData(rows: LedgerRow[]): AgDataSourcesDefinition {
-  const jobs = rows.map((r) => {
+  // Charts group by their category, so each job's label must be its own: jobs started in the same minute get a number.
+  const seen = new Map<string, number>();
+  const labels = [...rows].reverse().map((r) => {
+    const base = stamp.format(new Date(r.createdAt));
+    const n = (seen.get(base) ?? 0) + 1;
+    seen.set(base, n);
+    return n > 1 ? `${base} (${n})` : base;
+  }).reverse();
+  const jobs = rows.map((r, i) => {
     const amount = Number(r.amount);
+    const price = Number(r.price);
     const started = new Date(r.createdAt);
     return {
       id: r.id,
       job: r.title,
-      label: stamp.format(started),
+      label: labels[i],
       day: started.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       started,
       money: MONEY_WORDS[r.state],
       amount,
       paidOut: r.state === "paid" || r.state === "part_paid" ? amount : 0,
-      heldNow: r.state === "held" ? amount : 0,
-      returned: r.state === "cancelled" ? amount : 0,
+      heldNow: r.state === "held" ? price : 0,
+      returned: r.state === "cancelled" ? price : r.state === "part_paid" ? price - amount : 0,
       verdict: VERDICT_WORDS[r.verdict],
       ...Object.fromEntries(VERDICT_MEASURES.map(([v, k]) => [k, r.verdict === v ? 1 : 0])),
       secondsToPaid: r.secondsToPaid,

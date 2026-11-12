@@ -3,8 +3,11 @@
 /* Held's look: paper and ink, one colour per state of the money. Amber is held, green is paid,
    red is a failed check, violet asks a person to decide, grey is cancelled. */
 @theme {
-  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-serif: "IBM Plex Serif", ui-serif, Georgia, serif;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 
   --color-paper: #f7f5f0;
   --color-card: #ffffff;
@@ -36,7 +39,7 @@
     background: var(--color-paper);
     color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
-    font-feature-settings: "tnum" 1, "cv11" 1;
+    font-variant-numeric: tabular-nums;
   }
   body {
     font-family: var(--font-sans);
@@ -50,6 +53,16 @@
   }
   ::selection {
     background: var(--color-held-bg);
+  }
+  button,
+  a,
+  label[for],
+  summary {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
   }
 }
 
@@ -72,14 +85,14 @@
     font-size: 15px;
     background: var(--color-ink);
     color: white;
-    transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
+    transition: transform 160ms var(--ease-out), background-color 150ms ease, opacity 150ms ease;
     white-space: nowrap;
   }
   .btn:hover {
     background: #2a2e37;
   }
-  .btn:active {
-    transform: translateY(1px);
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
   }
   .btn:disabled {
     opacity: 0.45;
@@ -111,6 +124,9 @@
     line-height: 1.5;
     outline: none;
   }
+  .field {
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
   .field:focus {
     border-color: var(--color-ink-2);
     box-shadow: 0 0 0 3px rgb(22 24 29 / 0.08);
@@ -121,5 +137,49 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-ink-3);
+  }
+}
+
+/* Checking: an amber panel with light moving across it while the work is read. */
+@keyframes held-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+.shimmer {
+  background-image: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.65) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: held-shimmer 1.6s linear infinite;
+}
+
+/* A verdict lands: each row rises in, one after another. */
+@keyframes held-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.rise {
+  animation: held-rise 280ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+  }
+  .rise {
+    animation: held-fade 200ms ease both;
+  }
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
+}
+@keyframes held-fade {
+  from {
+    opacity: 0;
   }
 }
