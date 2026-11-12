@@ -57,9 +57,13 @@ function cached(msgs: Message[]) {
   return [...msgs.slice(0, -1), { ...last, content: last.content.map((b, i) => (i === last.content.length - 1 ? { ...b, ...cache } : b)) }];
 }
 
+// What every one of Studio's agents is told about this dashboard, whatever the reader typed.
+const HELD = `This dashboard is the ledger of Held, where PayPal holds a client's money until a freelancer's work passes its checks. Amounts are US dollars. In your written answers, write them with a dollar sign, like $110; the widgets format their own amounts, so say nothing about number formats. When the reader asks a question about the jobs, answer in words and also show the answer in a new widget at the bottom of the page, leaving every existing widget as it is.`;
+
 export async function agentTurn(key: string, req: AgLlmRequest): Promise<AgLlmResponse> {
   const { messages: msgs, system } = messages(req.input);
   if (req.instructions) system.unshift(req.instructions);
+  system.push(HELD);
   // Claude Sonnet 5.5 takes no forced tool choice, so a required call is asked for in words.
   const choice = req.toolChoice;
   if (choice === "required") system.push("Call one of your tools now.");
